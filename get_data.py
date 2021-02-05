@@ -74,16 +74,26 @@ def window_data (data, warmup, t_steps):
     print("Windowed data")
     return np.array(examples)
 
+# Returns array in form (n_examples, frames, crop_size**2)
+def reshape_data (data):
+    data = np.transpose(data, (0, 3, 1, 2))
+    data_shape = data.shape
+    reshaped_shape = (data_shape[0], data_shape[1], data_shape[2]**2)
+    data = np.reshape(data, reshaped_shape)
+
+    return data
+
 # Saves dataset as .pkl file at specified path
 def save_data (data, path):
     with open(path, 'wb') as p :
         data = pickle.dump(data, p, protocol=4)
         print("Saved data")
 
-data = get_preprocessed_data('../Spiking_model/preprocessed_dataset.pkl', n_examples='ALL')
+data = get_preprocessed_data('../Spiking_model/preprocessed_dataset.pkl', n_examples=20)
 print(data.shape)
 data = process_data(data, crop_size=20, total_side_crops=3)
 data = window_data(data, warmup=20, t_steps=8)
+data = reshape_data(data)
 np.random.shuffle(data)
 save_data(data, "processed_dataset.pkl")
 print(data.shape)
