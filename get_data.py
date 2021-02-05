@@ -53,11 +53,12 @@ def process_data (data, crop_size, total_side_crops):
 
     return np.array(examples)
 
-# Split examples into overlapping windows of length t_steps
-# Returns array in form (n_examples, crop_size, crop_size, t_steps)
-def window_data (data, t_steps):
+# Split examples into overlapping windows
+# Returns array in form (n_examples, crop_size, crop_size, warmup+t_steps+1)
+def window_data (data, warmup, t_steps):
     examples_size = len(data)
     frames_size = data.shape[-1] # Number of frames for each example
+    window_size = warmup+t_steps+1
 
     examples = []
 
@@ -65,10 +66,10 @@ def window_data (data, t_steps):
         curr_example = data[example_n]
 
         for frame_n in range(frames_size):
-            if frame_n+t_steps > frames_size:
+            if frame_n+window_size > frames_size:
                 break
 
-            window = curr_example[:, :, frame_n:frame_n+t_steps]
+            window = curr_example[:, :, frame_n:frame_n+window_size]
             examples.append(window)
     print("Windowed data")
     return np.array(examples)
@@ -79,10 +80,10 @@ def save_data (data, path):
         data = pickle.dump(data, p, protocol=4)
         print("Saved data")
 
-data = get_preprocessed_data('../Spiking_model/preprocessed_dataset.pkl', n_examples=50)
+data = get_preprocessed_data('../Spiking_model/preprocessed_dataset.pkl', n_examples='ALL')
 print(data.shape)
 data = process_data(data, crop_size=20, total_side_crops=3)
-data = window_data(data, t_steps=8)
+data = window_data(data, warmup=20, t_steps=8)
 np.random.shuffle(data)
 save_data(data, "processed_dataset.pkl")
 print(data.shape)
