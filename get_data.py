@@ -89,11 +89,11 @@ def save_data (data, path):
         data = pickle.dump(data, p, protocol=4)
         print("Saved data")
 
-data = get_preprocessed_data('./preprocessed_dataset.pkl', n_examples='ALL')
+data = get_preprocessed_data('./preprocessed_dataset.pkl', n_examples=750)
 print(data.shape)
 data = process_data(data, crop_size=20, total_side_crops=3)
 data = window_data(data, warmup=20, t_steps=5)
 data = reshape_data(data)
 np.random.shuffle(data)
-save_data(data, "processed_dataset.pkl")
+save_data(data, "processed_dataset_small.pkl")
 print(data.shape)
