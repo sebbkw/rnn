@@ -53,7 +53,7 @@ class RNN (nn.Module):
     @classmethod
     def load (cls, hidden_units, frame_size, t_steps, path):
         model = cls(hidden_units, frame_size, t_steps)
-        model.load_state_dict(torch.load(path))
+        model.load_state_dict(torch.load(path, map_location=torch.device(DEVICE)))
         model.eval()
 
         return model.to(DEVICE)
@@ -65,27 +65,3 @@ def L1_regularisation (lam, loss, model):
             weights = torch.cat((weights, params.flatten()), 0)
     
     return loss + lam*weights.abs().sum()
-
-def plot_input_weights (model, hidden_units, frame_size):
-    weights = model.rnn.weight_ih.cpu().detach().numpy()    
-    weights = weights[:hidden_units, :]
-    
-    im = np.zeros((frame_size, frame_size*hidden_units))
-    for i in range(hidden_units):
-        hidden_unit_weights = weights[i]
-        im[:, i*frame_size:(i+1)*frame_size] = np.reshape(hidden_unit_weights, (frame_size, frame_size))
-    
-    font_size = 5.5
-    font_size_title = 6
-    
-    fig, ax = plt.subplots(dpi=200)
-    ax.imshow(im, extent=[0, hidden_units, 0, 1], cmap='gray')
-    
-    ax.set_xticks(np.arange(0, hidden_units+1))
-    ax.set_xticklabels(np.arange(0, hidden_units+1), size=font_size)
-    ax.set_xlabel('Hidden unit', size=font_size)
-    
-    ax.set_yticks(np.arange(0, 2))
-    ax.set_yticklabels(np.arange(0, 2), size=font_size)    
-    
-    ax.grid(which='major', color='b', linestyle='-', linewidth=1)
