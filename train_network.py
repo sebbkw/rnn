@@ -45,7 +45,7 @@ def main ():
             inputs, targets = inputs.to(DEVICE), targets.to(DEVICE)
 
             optimizer.zero_grad()
-            output = model(inputs)
+            output, _ = model(inputs)
             loss = network.L1_regularisation(
                 lam = hyperparameters["L1"],
                 loss = criterion(output, targets),

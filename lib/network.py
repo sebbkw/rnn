@@ -48,6 +48,8 @@ class RNN (nn.Module):
         
     def forward (self, inputs):
         predictions = []
+        hidden_states = []
+        
         hidden_state = torch.zeros((inputs.shape[0], self.hidden_units)).to(DEVICE)
         
         warmup_length = inputs.shape[1] - self.t_steps
@@ -64,9 +66,14 @@ class RNN (nn.Module):
         for t in range(self.t_steps):
             hidden_state = self.rnn(prediction_inputs[:, t, :], hidden_state)
             prediction = self.fc(hidden_state)
+            
+            hidden_states.append(hidden_state)
             predictions.append(prediction)
             
-        return torch.transpose(torch.stack(predictions), 0, 1)
+        return (
+            torch.transpose(torch.stack(predictions), 0, 1),
+            torch.transpose(torch.stack(hidden_states), 0, 1)
+        )
         
     def save (self, file_name_params = {}, loss_history = None):
         model_file_name = get_file_name(file_name_params, 'pt')
