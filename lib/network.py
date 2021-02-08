@@ -1,11 +1,32 @@
 import numpy as np
 import time
+import pickle
 from matplotlib import pyplot as plt
 
 import torch
 import torch.nn as nn
 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+def L1_regularisation (lam, loss, model):
+    weights = torch.Tensor([]).to(DEVICE)
+    for name, params in model.named_parameters():
+        if name.endswith('weight'):
+            weights = torch.cat((weights, params.flatten()), 0)
+    
+    return loss + lam*weights.abs().sum()
+
+def get_file_name (file_name_params = {}, file_type = 'pt'):
+    time_str = time.strftime('%Y%m%d-%H%M%S')
+    path_name = './models/model'
+
+    for param in file_name_params:
+        value = file_name_params[param]
+        path_name += f'-{value}{param}'
+
+    path_name += f'-{time_str}.{file_type}'
+    
+    return path_name
 
 class RNN (nn.Module):
     def __init__ (self, hidden_units, frame_size, t_steps):
@@ -45,10 +66,17 @@ class RNN (nn.Module):
             
         return torch.transpose(torch.stack(predictions), 0, 1)
         
-    def save (self, file_name = None):
-        path_name = './models/' + (file_name or 'model-') + time.strftime('%Y%m%d-%H%M%S') + '.pt'
-        torch.save(self.state_dict(), path_name)
-        print('Saved model as ' + path_name)
+    def save (self, file_name_params = {}, loss_history = None):
+        model_file_name = get_file_name(file_name_params, 'pt')
+        loss_file_name = get_file_name(file_name_params, 'pickle')
+
+        torch.save(self.state_dict(), file_name)
+
+        if loss_history:
+            with open(file_name, 'wb') as p:
+                pickle.dump(loss_history, p, protocol=4)
+
+        print('Saved model as ' + file_name)
     
     @classmethod
     def load (cls, hidden_units, frame_size, t_steps, path):
@@ -57,11 +85,3 @@ class RNN (nn.Module):
         model.eval()
 
         return model.to(DEVICE)
-    
-def L1_regularisation (lam, loss, model):
-    weights = torch.Tensor([]).to(DEVICE)
-    for name, params in model.named_parameters():
-        if name.endswith('weight'):
-            weights = torch.cat((weights, params.flatten()), 0)
-    
-    return loss + lam*weights.abs().sum()
