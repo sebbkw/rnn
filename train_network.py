@@ -13,7 +13,7 @@ FRAME_SIZE = 20
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print("Using", DEVICE)
 
-train_dataset = FramesDataset('./processed_dataset.pkl', 'train', WARMUP)
+train_dataset = FramesDataset('./datasets/processed_dataset.pkl', 'train', WARMUP)
 train_data_loader = torch.utils.data.DataLoader(train_dataset, batch_size=128)
 
 print("Training dataset length:", len(train_dataset))
@@ -21,8 +21,8 @@ print("Training dataset length:", len(train_dataset))
 def main ():
     # Hyperparameters
     hyperparameters = {
-        "epochs": 1,
-        "units": 50,
+        "epochs": 2000,
+        "units": 400,
         "lr": 3e-4,
         "gradclip": 1.0,
         "L1": 10e-6
@@ -33,7 +33,7 @@ def main ():
 
     criterion = nn.MSELoss()
     optimizer = optim.Adam(model.parameters(), lr=hyperparameters["lr"])
-    
+
     loss_history = []
 
     for epoch in range(1, hyperparameters["epochs"] + 1):

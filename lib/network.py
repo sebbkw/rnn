@@ -70,13 +70,13 @@ class RNN (nn.Module):
         model_file_name = get_file_name(file_name_params, 'pt')
         loss_file_name = get_file_name(file_name_params, 'pickle')
 
-        torch.save(self.state_dict(), file_name)
+        torch.save(self.state_dict(), model_file_name)
 
         if loss_history:
-            with open(file_name, 'wb') as p:
+            with open(loss_file_name, 'wb') as p:
                 pickle.dump(loss_history, p, protocol=4)
 
-        print('Saved model as ' + file_name)
+        print('Saved model as ' + model_file_name)
     
     @classmethod
     def load (cls, hidden_units, frame_size, t_steps, path):
