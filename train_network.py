@@ -13,7 +13,7 @@ FRAME_SIZE = 20
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print("Using", DEVICE)
 
-train_dataset = FramesDataset('./processed_dataset_small.pkl', 'train', WARMUP)
+train_dataset = FramesDataset('./datasets/processed_dataset.pkl', 'train', WARMUP)
 train_data_loader = torch.utils.data.DataLoader(train_dataset, batch_size=128)
 
 print("Training dataset length:", len(train_dataset))
@@ -21,7 +21,7 @@ print("Training dataset length:", len(train_dataset))
 def main ():
     # Hyperparameters
     hyperparameters = {
-        "epochs": 5,
+        "epochs": 2,
         "units": 1600,
         "lr": 0.001,
         "gradclip": 0.25,
