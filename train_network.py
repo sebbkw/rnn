@@ -6,14 +6,14 @@ from matplotlib import pyplot as plt
 from lib.FramesDataset import FramesDataset
 from lib import network
 
-WARMUP = 20
-T_STEPS = 5
+WARMUP = 5
+T_STEPS = 35
 FRAME_SIZE = 20
 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print("Using", DEVICE)
 
-train_dataset = FramesDataset('./datasets/processed_dataset.pkl', 'train', WARMUP)
+train_dataset = FramesDataset('./processed_dataset_small.pkl', 'train', WARMUP)
 train_data_loader = torch.utils.data.DataLoader(train_dataset, batch_size=128)
 
 print("Training dataset length:", len(train_dataset))
@@ -21,10 +21,10 @@ print("Training dataset length:", len(train_dataset))
 def main ():
     # Hyperparameters
     hyperparameters = {
-        "epochs": 2000,
-        "units": 400,
-        "lr": 3e-4,
-        "gradclip": 1.0,
+        "epochs": 5,
+        "units": 1600,
+        "lr": 0.001,
+        "gradclip": 0.25,
         "L1": 10e-6
     }
 

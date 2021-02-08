@@ -26,7 +26,7 @@ class FramesDataset (torch.utils.data.Dataset):
     
     def __getitem__ (self, i):
         window = self.dataset[i]
-        x = window[:self.warmup_length, :]
+        x = window
         y = window[self.warmup_length:, :]
 
         return x, y

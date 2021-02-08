@@ -50,17 +50,19 @@ class RNN (nn.Module):
         predictions = []
         hidden_state = torch.zeros((inputs.shape[0], self.hidden_units)).to(DEVICE)
         
+        warmup_length = inputs.shape[1] - self.t_steps
+        warmup_inputs = inputs[:, :warmup_length, :]
+        prediction_inputs = inputs[:, warmup_length:, :]
+        
         # Warm up period
-        warmup_length = inputs.shape[1]
         for i in range(warmup_length):
             frame_batch = inputs[:, i, :]
             hidden_state = self.rnn(frame_batch, hidden_state)
         prediction = self.fc(hidden_state)
-        predictions.append(prediction)
 
-        # Autoregressive predictions
+        # Predictions
         for t in range(self.t_steps):
-            hidden_state = self.rnn(prediction, hidden_state)
+            hidden_state = self.rnn(prediction_inputs[:, t, :], hidden_state)
             prediction = self.fc(hidden_state)
             predictions.append(prediction)
             
