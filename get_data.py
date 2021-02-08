@@ -17,16 +17,16 @@ def get_preprocessed_data (path, n_examples):
 
 # Crops frame into total_side_crops**2 subframes of given crop_size
 # Returns array in form (examples, crop_size, crop_size, n_t_steps)
-def crop_frames (frames, crop_size, total_side_crops):
+def crop_frames (frames, crop_size, x_crops, y_crops):
     y_pixels, x_pixels = frames.shape[:2]
 
-    start_x = (x_pixels-(crop_size*total_side_crops)) / 2
-    start_y = (y_pixels-(crop_size*total_side_crops)) / 2
+    start_x = (x_pixels-(crop_size*x_crops)) / 2
+    start_y = (y_pixels-(crop_size*y_crops)) / 2
 
     crops = []
 
-    for x_pos in range(total_side_crops):
-        for y_pos in range(total_side_crops):
+    for x_pos in range(x_crops):
+        for y_pos in range(y_crops):
             x = int(start_x + crop_size*x_pos)
             y = int(start_y + crop_size*y_pos)
 
@@ -37,13 +37,13 @@ def crop_frames (frames, crop_size, total_side_crops):
     return np.array(crops)
 
 # Returns array in form (n_clips, crop_size, crop_size, n_t_steps)
-def process_data (data, crop_size, total_side_crops):
+def process_data (data, crop_size, x_crops, y_crops):
     examples_size = len(data)
     t_steps = data.shape[-1]
 
     examples = []
     for i in range(examples_size):
-        frames = crop_frames(data[i], crop_size, total_side_crops)
+        frames = crop_frames(data[i], crop_size, x_crops, y_crops)
         if i == 0:
             examples = frames
         else:
@@ -91,7 +91,7 @@ def save_data (data, path):
 
 data = get_preprocessed_data('./datasets/preprocessed_dataset.pkl', n_examples='ALL')
 print(data.shape)
-data = process_data(data, crop_size=20, total_side_crops=3)
+data = process_data(data, crop_size=20, x_crops=6, y_crops=3)
 data = window_data(data, warmup=5, t_steps=35)
 data = reshape_data(data)
 np.random.shuffle(data)
