@@ -24,6 +24,12 @@ def main (n_epochs, lr, hidden_units):
 
     criterion = nn.MSELoss()
     optimizer = optim.Adam(model.parameters(), lr=lr)
+    
+    # Hyperparameters
+    n_epochs = n_epochs
+    lr = lr
+    clip_value = 1.0
+    L1 = 10e-6
 
     loss_history = []
 
@@ -37,9 +43,9 @@ def main (n_epochs, lr, hidden_units):
 
             optimizer.zero_grad()
             output = model(inputs)
-            loss = network.L1_regularisation(10e-6, criterion(output, targets), model)
+            loss = network.L1_regularisation(L1, criterion(output, targets), model)
             loss.backward()
-            nn.utils.clip_grad_value_(model.parameters(), clip_value=5.0)  #Gradient Value Clipping
+            nn.utils.clip_grad_value_(model.parameters(), clip_value)  #Gradient Value Clipping
             optimizer.step()
 
             running_loss += loss.item()
