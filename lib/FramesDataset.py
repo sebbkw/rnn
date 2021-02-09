@@ -3,7 +3,7 @@ import pickle
 import torch
 
 class FramesDataset (torch.utils.data.Dataset):
-    def __init__ (self, path, split_type, warmup_length):
+    def __init__ (self, path, split_type, warmup):
         with open(path, 'rb') as file:
             dataset = pickle.load(file)
 
@@ -19,14 +19,14 @@ class FramesDataset (torch.utils.data.Dataset):
         dataset = dataset.type(torch.FloatTensor)
         
         self.dataset = dataset
-        self.warmup_length = warmup_length
+        self.warmup = warmup
         
     def __len__ (self):
         return len(self.dataset)
     
     def __getitem__ (self, i):
         window = self.dataset[i]
-        x = window
-        y = window[self.warmup_length:, :]
+        x = window[:-1, :] # All but last frame
+        y = window[self.warmup+1:, :] # Only frames after warmup, shifted by t=1
 
         return x, y

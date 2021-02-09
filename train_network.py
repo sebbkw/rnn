@@ -1,13 +1,12 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from matplotlib import pyplot as plt
 
 from lib.FramesDataset import FramesDataset
 from lib import network
 
-WARMUP = 5
-T_STEPS = 35
+WARMUP = 4
+T_STEPS = 45
 FRAME_SIZE = 20
 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -21,14 +20,17 @@ print("Training dataset length:", len(train_dataset))
 def main ():
     # Hyperparameters
     hyperparameters = {
-        "epochs": 1000,
+        "epochs": 10,
         "units": 1600,
         "lr": 0.001,
         "gradclip": 0.25,
         "L1": 10e-6
     }
 
-    model = network.RNN(hidden_units = hyperparameters["units"], frame_size = FRAME_SIZE, t_steps = T_STEPS)
+    model = network.RecurrentTemporalPrediction(
+        hidden_units = hyperparameters["units"],
+        frame_size = FRAME_SIZE, warmup = WARMUP
+    )
     model = model.to(DEVICE)
 
     criterion = nn.MSELoss()
@@ -46,6 +48,7 @@ def main ():
 
             optimizer.zero_grad()
             output, _ = model(inputs)
+            
             loss = network.L1_regularisation(
                 lam = hyperparameters["L1"],
                 loss = criterion(output, targets),

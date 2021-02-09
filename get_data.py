@@ -54,14 +54,12 @@ def process_data (data, crop_size, x_crops, y_crops):
     return np.array(examples)
 
 # Split examples into overlapping windows
-# Returns array in form (n_examples, crop_size, crop_size, warmup+t_steps)
-def window_data (data, warmup, t_steps):
+# Returns array in form (n_examples, crop_size, crop_size, window_size)
+def window_data (data, window_size):
     examples_size = len(data)
     frames_size = data.shape[-1] # Number of frames for each example
-    window_size = warmup+t_steps
 
     examples = []
-
     for example_n in range(examples_size):
         curr_example = data[example_n]
 
@@ -83,17 +81,21 @@ def reshape_data (data):
 
     return data
 
+def normalize_data (data):
+    return (data-np.mean(data)) / np.std(data)
+
 # Saves dataset as .pkl file at specified path
 def save_data (data, path):
     with open(path, 'wb') as p :
         data = pickle.dump(data, p, protocol=4)
         print("Saved data")
 
-data = get_preprocessed_data('./datasets/preprocessed_dataset.pkl', n_examples='ALL')
+data = get_preprocessed_data('./datasets/preprocessed_dataset.pkl', n_examples=2)
 print(data.shape)
-data = process_data(data, crop_size=20, x_crops=6, y_crops=3)
-data = window_data(data, warmup=5, t_steps=35)
+data = process_data(data, crop_size=20, x_crops=7, y_crops=4)
+data = window_data(data, window_size=4+45+1)
 data = reshape_data(data)
+data = normalize_data(data)
 np.random.shuffle(data)
 save_data(data, "./datasets/processed_dataset.pkl")
 print(data.shape)
