@@ -21,7 +21,7 @@ print("Training dataset length:", len(train_dataset))
 def main ():
     # Hyperparameters
     hyperparameters = {
-        "epochs": 2,
+        "epochs": 1000,
         "units": 1600,
         "lr": 0.001,
         "gradclip": 0.25,
