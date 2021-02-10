@@ -20,7 +20,7 @@ print("Training dataset length:", len(train_dataset))
 def main ():
     # Hyperparameters
     hyperparameters = {
-        "epochs": 10,
+        "epochs": 2000,
         "units": 1600,
         "lr": 0.001,
         "gradclip": 0.25,
@@ -48,7 +48,7 @@ def main ():
 
             optimizer.zero_grad()
             output, _ = model(inputs)
-            
+
             loss = network.L1_regularisation(
                 lam = hyperparameters["L1"],
                 loss = criterion(output, targets),

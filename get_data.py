@@ -90,7 +90,7 @@ def save_data (data, path):
         data = pickle.dump(data, p, protocol=4)
         print("Saved data")
 
-data = get_preprocessed_data('./datasets/preprocessed_dataset.pkl', n_examples=2)
+data = get_preprocessed_data('./datasets/preprocessed_dataset.pkl', n_examples='ALL')
 print(data.shape)
 data = process_data(data, crop_size=20, x_crops=7, y_crops=4)
 data = window_data(data, window_size=4+45+1)
