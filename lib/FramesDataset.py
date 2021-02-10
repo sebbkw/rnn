@@ -9,7 +9,7 @@ class FramesDataset (torch.utils.data.Dataset):
 
         n = len(dataset)
         splits = {
-            "train": slice(0, int(n*0.8)),
+            "train": slice(0, int(n*1)),
             "val": slice(int(n*0.8), int(n*0.9)),
             "test": slice(int(n*0.9), None)
         }
