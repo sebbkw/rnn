@@ -21,8 +21,8 @@ def main ():
     # Hyperparameters
     hyperparameters = {
         "epochs": 2000,
-        "units": 1600,
-        "lr": 0.001,
+        "units": 400,
+        "lr": 3e-4,
         "gradclip": 0.25,
         "L1": 10e-6
     }
