@@ -20,11 +20,11 @@ print("Training dataset length:", len(train_dataset))
 def main ():
     # Hyperparameters
     hyperparameters = {
-        "epochs": 1000,
+        "epochs": 2000,
         "units": 400,
         "lr": 3e-4,
         "gradclip": 0.25,
-        "L1": 10**-5.75
+        "L1": 5.5e-6
     }
 
     model = network.RecurrentTemporalPrediction(
