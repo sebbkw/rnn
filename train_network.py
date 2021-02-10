@@ -24,7 +24,7 @@ def main ():
         "units": 400,
         "lr": 3e-4,
         "gradclip": 0.25,
-        "L1": 10e-6
+        "L1": 10**-6
     }
 
     model = network.RecurrentTemporalPrediction(
