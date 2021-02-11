@@ -5,14 +5,14 @@ import torch.optim as optim
 from lib.FramesDataset import FramesDataset
 from lib import network
 
-WARMUP = 4
-T_STEPS = 45
+WARMUP = 5
+T_STEPS = 35
 FRAME_SIZE = 20
 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print("Using", DEVICE)
 
-train_dataset = FramesDataset('./datasets/processed_dataset.pkl', 'train', WARMUP)
+train_dataset = FramesDataset('./datasets/processed_dataset_35tsteps.pkl', 'train', WARMUP)
 train_data_loader = torch.utils.data.DataLoader(train_dataset, batch_size=128)
 
 print("Training dataset length:", len(train_dataset))
@@ -20,11 +20,12 @@ print("Training dataset length:", len(train_dataset))
 def main ():
     # Hyperparameters
     hyperparameters = {
+        "datset": "large35tsteps",
         "epochs": 2000,
-        "units": 400,
+        "units": 800,
         "lr": 3e-4,
         "gradclip": 0.25,
-        "L1": 10**-5.75
+        "L1": 10**-6
     }
 
     model = network.RecurrentTemporalPrediction(
