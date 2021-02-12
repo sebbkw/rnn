@@ -21,10 +21,10 @@ def main ():
     # Hyperparameters
     hyperparameters = {
         "epochs": 2000,
-        "units": 800,
+        "units": 100,
         "lr": 3*10**-4,
         "gradclip": 0.25,
-        "L1": 10**-6
+        "L1": 10**-5.75
     }
 
     model = network.RecurrentTemporalPrediction(
