@@ -43,7 +43,7 @@ class RecurrentTemporalPrediction (nn.Module):
         self.fc = nn.Linear(hidden_units, frame_size**2)
 
         # Initialise RNN weights with identity matrix 
-        self.state_dict()['rnn.weight_hh_l0'][:] = torch.nn.Parameter(torch.eye(hidden_units, hidden_units))
+        self.state_dict()['rnn.weight_hh_l0'][:] = torch.nn.Parameter(torch.eye(hidden_units, hidden_units)) / 100
 
     def forward (self, inputs):
         out, hidden = self.rnn(inputs)

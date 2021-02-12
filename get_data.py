@@ -81,21 +81,28 @@ def reshape_data (data):
 
     return data
 
+# Normalized whole dataset, then each individual example
+# Returns array in form (n_examples, frames, crop_size**2)
 def normalize_data (data):
-    return (data-np.mean(data)) / np.std(data)
+    normalized = (data-np.mean(data)) / np.std(data)
+    
+    def normalize_example (a):
+        return (a-np.mean(a)) / np.std(a)
+    
+    return np.array([normalize_example(a) for a in normalized])
 
-# Saves dataset as .pkl file at specified path
+# Saves dataset as .np file at specified path
 def save_data (data, path):
     with open(path, 'wb') as p :
-        data = pickle.dump(data, p, protocol=4)
+        np.save(p, data)
         print("Saved data")
 
-data = get_preprocessed_data('./datasets/preprocessed_dataset.pkl', n_examples='ALL')
+data = get_preprocessed_data('../Spiking_model/preprocessed_dataset.pkl', n_examples=10)
 print(data.shape)
 data = process_data(data, crop_size=20, x_crops=7, y_crops=4)
 data = window_data(data, window_size=4+45+1)
 data = reshape_data(data)
 data = normalize_data(data)
 np.random.shuffle(data)
-save_data(data, "./datasets/processed_dataset.pkl")
+save_data(data, "./processed_dataset.npy")
 print(data.shape)

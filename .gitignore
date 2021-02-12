@@ -1,3 +1,4 @@
+*.npy
 *.pkl
 .ipynb_checkpoints
 .DS_Store
