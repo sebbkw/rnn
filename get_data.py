@@ -48,6 +48,7 @@ def process_data (data, crop_size, x_crops, y_crops):
             examples = frames
         else:
             examples = np.concatenate((examples, frames), 0)
+        print("Processing %i of %i" % (i+1, examples_size))
     
     print("Processed data")
 
@@ -57,18 +58,16 @@ def process_data (data, crop_size, x_crops, y_crops):
 # Returns array in form (n_examples, crop_size, crop_size, window_size)
 def window_data (data, window_size):
     examples_size = len(data)
-    frames_size = data.shape[-1] # Number of frames for each example
-
+    frames_size = data.shape[-1] # Number of frames for each example    
+    
     examples = []
     for example_n in range(examples_size):
         curr_example = data[example_n]
 
-        for frame_n in range(frames_size):
-            if frame_n+window_size > frames_size:
-                break
-
-            window = curr_example[:, :, frame_n:frame_n+window_size]
+        for frame_n in range(frames_size // window_size):
+            window = curr_example[:, :, frame_n*window_size:(frame_n+1)*window_size]
             examples.append(window)
+            
     print("Windowed data")
     return np.array(examples)
 
@@ -97,12 +96,12 @@ def save_data (data, path):
         np.save(p, data)
         print("Saved data")
 
-data = get_preprocessed_data('../Spiking_model/preprocessed_dataset.pkl', n_examples=10)
+data = get_preprocessed_data('./datasets/preprocessed_dataset.pkl', n_examples=10)
 print(data.shape)
 data = process_data(data, crop_size=20, x_crops=7, y_crops=4)
 data = window_data(data, window_size=4+45+1)
 data = reshape_data(data)
 data = normalize_data(data)
 np.random.shuffle(data)
-save_data(data, "./processed_dataset.npy")
+save_data(data, "./datasets/processed_dataset.npy")
 print(data.shape)

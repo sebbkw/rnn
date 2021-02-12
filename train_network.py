@@ -5,14 +5,14 @@ import torch.optim as optim
 from lib.FramesDataset import FramesDataset
 from lib import network
 
-WARMUP = 5
-T_STEPS = 35
+WARMUP = 4
+T_STEPS = 45
 FRAME_SIZE = 20
 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print("Using", DEVICE)
 
-train_dataset = FramesDataset('./processed_dataset.npy', 'all', WARMUP)
+train_dataset = FramesDataset('./datasets/processed_dataset.npy', 'all', WARMUP)
 train_data_loader = torch.utils.data.DataLoader(train_dataset, batch_size=128)
 
 print("Training dataset length:", len(train_dataset))
@@ -20,8 +20,8 @@ print("Training dataset length:", len(train_dataset))
 def main ():
     # Hyperparameters
     hyperparameters = {
-        "epochs": 10,
-        "units": 800,
+        "epochs": 2000,
+        "units": 100,
         "lr": 1e-4,
         "gradclip": 0.25,
         "L1": 10**-6
