@@ -96,7 +96,7 @@ def save_data (data, path):
         np.save(p, data)
         print("Saved data")
 
-data = get_preprocessed_data('./datasets/preprocessed_dataset.pkl', n_examples=10)
+data = get_preprocessed_data('./datasets/preprocessed_dataset.pkl', n_examples='ALL')
 print(data.shape)
 data = process_data(data, crop_size=20, x_crops=6, y_crops=3, step=0.25)
 data = window_data(data, window_size=4+45+1)
