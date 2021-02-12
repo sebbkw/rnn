@@ -25,8 +25,8 @@ def crop_frames (frames, crop_size, x_crops, y_crops, step):
 
     crops = []
 
-    for x_pos in np.arange(0, x_crops, step):
-        for y_pos in np.arange(0, y_crops, step):
+    for x_pos in np.arange(0, x_crops-1, step):
+        for y_pos in np.arange(0, y_crops-1, step):
             x = int(start_x + crop_size*x_pos)
             y = int(start_y + crop_size*y_pos)
 
@@ -98,7 +98,7 @@ def save_data (data, path):
 
 data = get_preprocessed_data('./datasets/preprocessed_dataset.pkl', n_examples=10)
 print(data.shape)
-data = process_data(data, crop_size=20, x_crops=7, y_crops=4, step=0.25)
+data = process_data(data, crop_size=20, x_crops=6, y_crops=3, step=0.25)
 data = window_data(data, window_size=4+45+1)
 data = reshape_data(data)
 data = normalize_data(data)
