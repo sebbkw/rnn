@@ -28,8 +28,6 @@ def crop_frames (frames, crop_size, x_crops, y_crops, step = 1):
     x_range = range(x_crops) if int(step)==step else np.arange(0, x_crops-1, step)
     y_range = range(y_crops) if int(step)==step else np.arange(0, y_crops-1, step)
 
-    print(x_range, y_range)
-
     for x_pos in x_range:
         for y_pos in y_range:
             x = int(start_x + crop_size*x_pos)
