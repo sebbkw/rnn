@@ -17,7 +17,7 @@ def get_preprocessed_data (path, n_examples):
 
 # Crops frame into total_side_crops**2 subframes of given crop_size
 # Returns array in form (examples, crop_size, crop_size, n_t_steps)
-def crop_frames (frames, crop_size, x_crops, y_crops, step):
+def crop_frames (frames, crop_size, x_crops, y_crops, step = 1):
     y_pixels, x_pixels = frames.shape[:2]
 
     start_x = (x_pixels-(crop_size*x_crops)) / 2
@@ -25,8 +25,11 @@ def crop_frames (frames, crop_size, x_crops, y_crops, step):
 
     crops = []
 
-    for x_pos in np.arange(0, x_crops-1, step):
-        for y_pos in np.arange(0, y_crops-1, step):
+    x_range = range(x_crops) if int(step)==step else np.arange(0, x_crops-1, step)
+    y_range = range(y_crops) if int(step)==step else np.arange(0, y_crops-1, step)
+
+    for x_pos in x_range:
+        for y_pos in y_range:
             x = int(start_x + crop_size*x_pos)
             y = int(start_y + crop_size*y_pos)
 
@@ -44,10 +47,8 @@ def process_data (data, crop_size, x_crops, y_crops, step):
     examples = []
     for i in range(examples_size):
         frames = crop_frames(data[i], crop_size, x_crops, y_crops, step)
-        if i == 0:
-            examples = frames
-        else:
-            examples = np.concatenate((examples, frames), 0)
+        for frame in frames:
+            examples.append(frame)
         print("Processing %i of %i" % (i+1, examples_size))
     
     print("Processed data")
@@ -78,6 +79,7 @@ def reshape_data (data):
     reshaped_shape = (data_shape[0], data_shape[1], data_shape[2]**2)
     data = np.reshape(data, reshaped_shape)
 
+    print("Reshaped data")
     return data
 
 # Normalized whole dataset, then each individual example
@@ -88,6 +90,7 @@ def normalize_data (data):
     def normalize_example (a):
         return (a-np.mean(a)) / np.std(a)
     
+    print("Normalized data")
     return np.array([normalize_example(a) for a in normalized])
 
 # Saves dataset as .np file at specified path
@@ -98,10 +101,10 @@ def save_data (data, path):
 
 data = get_preprocessed_data('./datasets/preprocessed_dataset.pkl', n_examples='ALL')
 print(data.shape)
-data = process_data(data, crop_size=20, x_crops=6, y_crops=3, step=0.25)
-data = window_data(data, window_size=4+45+1)
+data = process_data(data, crop_size=15, x_crops=10, y_crops=5, step=0.25)
+data = window_data(data, window_size=4+20+1)
 data = reshape_data(data)
 data = normalize_data(data)
 np.random.shuffle(data)
-save_data(data, "./datasets/processed_dataset.npy")
+save_data(data, "./datasets/processed_dataset_15px_20tsteps.npy")
 print(data.shape)
