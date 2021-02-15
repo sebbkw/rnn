@@ -47,10 +47,8 @@ def process_data (data, crop_size, x_crops, y_crops, step):
     examples = []
     for i in range(examples_size):
         frames = crop_frames(data[i], crop_size, x_crops, y_crops, step)
-        if i == 0:
-            examples = frames
-        else:
-            examples = np.concatenate((examples, frames), 0)
+        for frame in frames:
+            examples.append(frame)
         print("Processing %i of %i" % (i+1, examples_size))
     
     print("Processed data")
@@ -81,6 +79,7 @@ def reshape_data (data):
     reshaped_shape = (data_shape[0], data_shape[1], data_shape[2]**2)
     data = np.reshape(data, reshaped_shape)
 
+    print("Reshaped data")
     return data
 
 # Normalized whole dataset, then each individual example
@@ -91,6 +90,7 @@ def normalize_data (data):
     def normalize_example (a):
         return (a-np.mean(a)) / np.std(a)
     
+    print("Normalized data")
     return np.array([normalize_example(a) for a in normalized])
 
 # Saves dataset as .np file at specified path
@@ -101,10 +101,10 @@ def save_data (data, path):
 
 data = get_preprocessed_data('./datasets/preprocessed_dataset.pkl', n_examples='ALL')
 print(data.shape)
-data = process_data(data, crop_size=15, x_crops=10, y_crops=5, step=0.5)
+data = process_data(data, crop_size=15, x_crops=10, y_crops=5, step=0.25)
 data = window_data(data, window_size=4+20+1)
 data = reshape_data(data)
 data = normalize_data(data)
 np.random.shuffle(data)
-save_data(data, "./datasets/processed_dataset_15px.npy")
+save_data(data, "./datasets/processed_dataset_15px_20tsteps.npy")
 print(data.shape)
