@@ -25,7 +25,7 @@ class FramesDataset (torch.utils.data.Dataset):
         window = torch.from_numpy(window)
         window = window.type(torch.FloatTensor)
         
-        x = window[:-1, :] # All but last frame
+        x = window[:, :] # All
         y = window[self.warmup+1:, :] # Only frames after warmup, shifted by t=1
 
         return x, y

@@ -9,14 +9,15 @@ DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print("Using", DEVICE)
 
 hyperparameters = {
+    "mode": "hierarchical",
     "framesize": 20,
     "tsteps": 45,
     "warmup": 4,
-    "epochs": 2000,
-    "units": 100,
-    "lr": 3*10**-4,
+    "epochs": 10,
+    "units": 800,
+    "lr": 10**-3,
     "gradclip": 0.25,
-    "L1": 10**-5.75
+    "L1": 10**-6
 }
 
 train_dataset = FramesDataset('./datasets/processed_dataset.npy', 'all', hyperparameters["warmup"])
@@ -29,8 +30,6 @@ model = network.RecurrentTemporalPrediction(
     warmup = hyperparameters["warmup"]
 )
 model = model.to(DEVICE)
-
-criterion = nn.MSELoss()
 optimizer = optim.Adam(model.parameters(), lr=hyperparameters["lr"])
 
 loss_history = []
@@ -40,26 +39,30 @@ for epoch in range(1, hyperparameters["epochs"] + 1):
     loss_i = 0
 
     for batch_n, data in enumerate(train_data_loader):
-        inputs, targets = data
-        inputs, targets = inputs.to(DEVICE), targets.to(DEVICE)
+        inputs, frame_targets = data
+        inputs, frame_targets = inputs.to(DEVICE), frame_targets.to(DEVICE)
 
         optimizer.zero_grad()
-        output, _ = model(inputs)
+        outputs, hidden_states = model(inputs)
 
-        loss = network.L1_regularisation(
-            lam = hyperparameters["L1"],
-            loss = criterion(output, targets),
-            model = model
+        loss = model.loss_fn(
+            outputs = outputs,
+            frame_targets = frame_targets,
+            hidden_states = hidden_states,
+            L1_lambda = hyperparameters["L1"],
+            beta = 0.1
         )
+        
         loss.backward()
+        model.mask_gradients()
         nn.utils.clip_grad_value_(model.parameters(), hyperparameters["gradclip"])
         optimizer.step()
-
+        
         running_loss += loss.item()
         loss_i += 1
+        loss_history.append(running_loss / loss_i)
 
-    loss_history.append(running_loss / loss_i)
     print('Epoch: {}/{}.............'.format(epoch, hyperparameters["epochs"]), end=' ')
     print("Loss: {:.4f}".format(loss_history[-1]))
 
-model.save(hyperparameters, loss_history)
+#model.save(hyperparameters, loss_history)
