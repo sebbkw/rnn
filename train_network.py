@@ -10,17 +10,17 @@ print("Using", DEVICE)
 
 hyperparameters = {
     "mode": "hierarchical",
-    "framesize": 20,
-    "tsteps": 45,
+    "framesize": 15,
+    "tsteps": 20,
     "warmup": 4,
-    "epochs": 10,
-    "units": 800,
+    "epochs": 2000,
+    "units": 1600,
     "lr": 10**-3,
     "gradclip": 0.25,
     "L1": 10**-6
 }
 
-train_dataset = FramesDataset('./datasets/processed_dataset.npy', 'all', hyperparameters["warmup"])
+train_dataset = FramesDataset('./datasets/processed_dataset_15px_20tsteps_101500.npy', 'all', hyperparameters["warmup"])
 train_data_loader = torch.utils.data.DataLoader(train_dataset, batch_size=128)
 print("Training dataset length:", len(train_dataset))
 
@@ -65,4 +65,4 @@ for epoch in range(1, hyperparameters["epochs"] + 1):
     print('Epoch: {}/{}.............'.format(epoch, hyperparameters["epochs"]), end=' ')
     print("Loss: {:.4f}".format(loss_history[-1]))
 
-#model.save(hyperparameters, loss_history)
+model.save(hyperparameters, loss_history)

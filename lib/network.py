@@ -56,11 +56,11 @@ class RecurrentTemporalPrediction (nn.Module):
         self.state_dict()['rnn.weight_hh_l0'][:] = nn.Parameter(torch.eye(hidden_units, hidden_units)) / 100
 
         # Mask to zero out weights for group 2 (second half) of RNN input connections
-        self.rnn_mask = torch.ones(self.rnn.weight_ih_l0.shape)
+        self.rnn_mask = torch.ones(self.rnn.weight_ih_l0.shape).to(DEVICE)
         self.rnn_mask[self.hidden_units_group:, :] = 0
 
         # Mask to zero out weights for group 1-group 2 and group 2-group 1 RNN-FC connections
-        self.fc_mask_hierarchical = torch.ones(self.fc.weight.shape)
+        self.fc_mask_hierarchical = torch.ones(self.fc.weight.shape).to(DEVICE)
         self.fc_mask_hierarchical[self.output_units_group1:, :self.output_units_group1] = 0
         self.fc_mask_hierarchical[:self.output_units_group1, self.output_units_group1:] = 0
 
