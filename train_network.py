@@ -10,24 +10,25 @@ print("Using", DEVICE)
 
 hyperparameters = {
     "mode": "hierarchical",
-    "framesize": 15,
-    "tsteps": 20,
+    "framesize": 20,
+    "tsteps": 45,
     "warmup": 4,
-    "epochs": 2000,
+    "epochs": 500,
     "units": 1600,
     "lr": 10**-3,
     "gradclip": 0.25,
     "L1": 10**-6
 }
 
-train_dataset = FramesDataset('./datasets/processed_dataset_15px_20tsteps_101500.npy', 'all', hyperparameters["warmup"])
+train_dataset = FramesDataset('./datasets/processed_dataset.npy', 'all', hyperparameters["warmup"])
 train_data_loader = torch.utils.data.DataLoader(train_dataset, batch_size=128)
 print("Training dataset length:", len(train_dataset))
 
 model = network.RecurrentTemporalPrediction(
     hidden_units = hyperparameters["units"],
     frame_size = hyperparameters["framesize"],
-    warmup = hyperparameters["warmup"]
+    warmup = hyperparameters["warmup"],
+    mode = hyperparameters["mode"]
 )
 model = model.to(DEVICE)
 optimizer = optim.Adam(model.parameters(), lr=hyperparameters["lr"])
@@ -60,7 +61,8 @@ for epoch in range(1, hyperparameters["epochs"] + 1):
         
         running_loss += loss.item()
         loss_i += 1
-        loss_history.append(running_loss / loss_i)
+
+    loss_history.append(running_loss / loss_i)
 
     print('Epoch: {}/{}.............'.format(epoch, hyperparameters["epochs"]), end=' ')
     print("Loss: {:.4f}".format(loss_history[-1]))
