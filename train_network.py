@@ -17,7 +17,8 @@ hyperparameters = {
     "units": 1600,
     "lr": 10**-3,
     "gradclip": 0.25,
-    "L1": 10**-6
+    "L1": 10**-6,
+    "beta": 0.5
 }
 
 train_dataset = FramesDataset('./datasets/processed_dataset_15px_20tsteps_101500.npy', 'all', hyperparameters["warmup"])
@@ -51,7 +52,7 @@ for epoch in range(1, hyperparameters["epochs"] + 1):
             frame_targets = frame_targets,
             hidden_states = hidden_states,
             L1_lambda = hyperparameters["L1"],
-            beta = 0.1
+            beta = hyperparameters["beta"]
         )
         
         loss.backward()

@@ -105,12 +105,16 @@ class RecurrentTemporalPrediction (nn.Module):
         # Shift forward by warmup (discarded) + 1 (offset for prediction)
         hidden_state_targets = hidden_states[:, self.warmup+1:, :self.hidden_units_group]
 
-        loss = MSE(output_units_group1, frame_targets) + self.L1_regularisation(L1_lambda)
+        L1 = self.L1_regularisation(L1_lambda)
 
         if self.mode == 'control':
-            return loss
+            return MSE(output_units_group1, frame_targets) + L1
         elif self.mode == 'hierarchical':
-            return loss + MSE(output_units_group2, hidden_state_targets)*beta
+            return (
+                MSE(output_units_group1, frame_targets)*(1-beta) +
+                MSE(output_units_group2, hidden_state_targets)*beta +
+                L1
+            )
 
     def save (self, file_name_params = {}, loss_history = None):
         model_file_name = get_file_name(file_name_params, 'pt')
@@ -125,8 +129,8 @@ class RecurrentTemporalPrediction (nn.Module):
         print('Saved model as ' + model_file_name)
 
     @classmethod
-    def load (cls, hidden_units, frame_size, warmup, path):
-        model = cls(hidden_units, frame_size, warmup)
+    def load (cls, hidden_units, frame_size, warmup, mode, path):
+        model = cls(hidden_units, frame_size, warmup, mode)
         model.load_state_dict(torch.load(path, map_location=torch.device(DEVICE)), strict=False)
         model.eval()
 
