@@ -24,6 +24,8 @@ class RecurrentTemporalPrediction (nn.Module):
     def __init__ (self, hidden_units, frame_size, warmup, mode):
         super(RecurrentTemporalPrediction, self).__init__()
 
+        self.inhibitory_ratio = 0.1
+
         self.hidden_units = hidden_units
         self.frame_size = frame_size
         self.warmup = warmup
@@ -74,9 +76,11 @@ class RecurrentTemporalPrediction (nn.Module):
         elif self.mode == 'hierarchical':
             self.fc.weight.data.mul_(self.fc_mask_hierarchical)
 
+        self.clamp_hidden_weights()
+
         # Forward pass
         rnn_outputs, _ = self.rnn(inputs)
-        fc_outputs = self.fc(rnn_outputs[:, self.warmup:, :])
+        fc_outputs = self.fc(rnn_outputs[:, self.warmup:, :]) # Discard warmup outputs
         fc_outputs = fc_outputs[:, :-1, :] # Discard last output as there is no frame target 
                                            # Rather, last tstep used to generate final hidden state
 
@@ -89,6 +93,22 @@ class RecurrentTemporalPrediction (nn.Module):
         elif self.mode == 'hierarchical':
             self.fc.weight.grad.data.mul_(self.fc_mask_hierarchical)
 
+    def clamp_hidden_weights (self):
+        group1_inhibitory_units = int(self.hidden_units_group*self.inhibitory_ratio)
+        group2_inhibitory_units = int(self.hidden_units_group+self.hidden_units_group*self.inhibitory_ratio)
+        
+        with torch.no_grad():
+            hh_weights = self.rnn.weight_hh_l0.clone()
+
+            # First, clamp weights to a minimum of zero
+            out = hh_weights.clamp(min = 0) #torch.abs(hh_weights)
+
+            # Next, clamp 10% of local connections to a maximum of zero
+            out[:self.hidden_units_group, :group1_inhibitory_units] = hh_weights[:self.hidden_units_group, :group1_inhibitory_units].clamp(max=0) # Group 1
+            out[self.hidden_units_group:, self.hidden_units_group:group2_inhibitory_units] = hh_weights[self.hidden_units_group:, self.hidden_units_group:group2_inhibitory_units].clamp(max=0) # Group 2
+
+            # Update parameters
+            self.rnn.weight_hh_l0.copy_(out)
     def L1_regularisation (self, lam):
         weights = torch.Tensor([]).to(DEVICE)
         for name, params in self.named_parameters():
