@@ -76,7 +76,7 @@ class RecurrentTemporalPrediction (nn.Module):
         elif self.mode == 'hierarchical':
             self.fc.weight.data.mul_(self.fc_mask_hierarchical)
 
-        self.clamp_hidden_weights()
+        self.set_inhibitory_units()
 
         # Forward pass
         rnn_outputs, _ = self.rnn(inputs)
@@ -93,22 +93,23 @@ class RecurrentTemporalPrediction (nn.Module):
         elif self.mode == 'hierarchical':
             self.fc.weight.grad.data.mul_(self.fc_mask_hierarchical)
 
-    def clamp_hidden_weights (self):
+    def set_inhibitory_units (self):
         group1_inhibitory_units = int(self.hidden_units_group*self.inhibitory_ratio)
         group2_inhibitory_units = int(self.hidden_units_group+self.hidden_units_group*self.inhibitory_ratio)
         
         with torch.no_grad():
             hh_weights = self.rnn.weight_hh_l0.clone()
 
-            # First, clamp weights to a minimum of zero
-            out = hh_weights.clamp(min = 0) #torch.abs(hh_weights)
+            # First, apply element-wise absolute to HH weights/bias matrix
+            hh_weights = torch.abs(hh_weights)
 
-            # Next, clamp 10% of local connections to a maximum of zero
-            out[:self.hidden_units_group, :group1_inhibitory_units] = hh_weights[:self.hidden_units_group, :group1_inhibitory_units].clamp(max=0) # Group 1
-            out[self.hidden_units_group:, self.hidden_units_group:group2_inhibitory_units] = hh_weights[self.hidden_units_group:, self.hidden_units_group:group2_inhibitory_units].clamp(max=0) # Group 2
+            # Next, take negative of absolute for local connections (group 1 to group 1, group 2 to group 2)
+            hh_weights[:self.hidden_units_group, :group1_inhibitory_units] *= -1 # Group 1
+            hh_weights[self.hidden_units_group:, self.hidden_units_group:group2_inhibitory_units] *= -1 # Group 2
 
             # Update parameters
-            self.rnn.weight_hh_l0.copy_(out)
+            self.rnn.weight_hh_l0.copy_(hh_weights)
+
     def L1_regularisation (self, lam):
         weights = torch.Tensor([]).to(DEVICE)
         for name, params in self.named_parameters():
@@ -140,10 +141,10 @@ class RecurrentTemporalPrediction (nn.Module):
         model_file_name = get_file_name(file_name_params, 'pt')
         loss_file_name = get_file_name(file_name_params, 'pickle')
 
-        torch.save(self.state_dict(), model_file_name)
+        torch.save(self.state_dict(), 'test.pt') # model_file_name)
 
         if loss_history:
-            with open(loss_file_name, 'wb') as p:
+            with open('test.pickle', 'wb') as p:
                 pickle.dump(loss_history, p, protocol=4)
 
         print('Saved model as ' + model_file_name)
