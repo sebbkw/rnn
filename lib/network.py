@@ -70,10 +70,11 @@ class RecurrentTemporalPrediction (nn.Module):
 
     def forward (self, inputs):
         # Mask weights
-        self.rnn.weight_ih_l0.data.mul_(self.rnn_mask)
+        if self.mode == 'control' or self.mode == 'hierarchical':
+            self.rnn.weight_ih_l0.data.mul_(self.rnn_mask)
         if self.mode ==  'control':
             self.fc.weight.data.mul_(self.fc_mask_control)
-        elif self.mode == 'hierarchical':
+        elif self.mode == 'hierarchical' or self.mode == 'hierarchical-group2input':
             self.fc.weight.data.mul_(self.fc_mask_hierarchical)
 
         self.set_inhibitory_units()
@@ -87,10 +88,11 @@ class RecurrentTemporalPrediction (nn.Module):
         return fc_outputs, rnn_outputs
 
     def mask_gradients (self):
-        self.rnn.weight_ih_l0.grad.data.mul_(self.rnn_mask)
+        if self.mode == 'control' or self.mode == 'hierarchical':
+            self.rnn.weight_ih_l0.grad.data.mul_(self.rnn_mask)
         if self.mode ==  'control':
             self.fc.weight.grad.data.mul_(self.fc_mask_control)
-        elif self.mode == 'hierarchical':
+        elif self.mode == 'hierarchical' or self.mode == 'hierarchical-group2input':
             self.fc.weight.grad.data.mul_(self.fc_mask_hierarchical)
 
     def set_inhibitory_units (self):
@@ -141,10 +143,10 @@ class RecurrentTemporalPrediction (nn.Module):
         model_file_name = get_file_name(file_name_params, 'pt')
         loss_file_name = get_file_name(file_name_params, 'pickle')
 
-        torch.save(self.state_dict(), 'test.pt') # model_file_name)
+        torch.save(self.state_dict(), model_file_name)
 
         if loss_history:
-            with open('test.pickle', 'wb') as p:
+            with open(loss_file_name, 'wb') as p:
                 pickle.dump(loss_history, p, protocol=4)
 
         print('Saved model as ' + model_file_name)
