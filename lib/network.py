@@ -37,7 +37,7 @@ class RecurrentTemporalPrediction (nn.Module):
 
         if mode == 'control':
             self.output_units = self.output_units_group1
-        elif mode == 'hierarchical':
+        elif mode == 'hierarchical' or mode == 'hierarchical-group2input':
             self.output_units = self.output_units_group1 + self.output_units_group2
 
         self.rnn = nn.RNN(
@@ -132,7 +132,7 @@ class RecurrentTemporalPrediction (nn.Module):
 
         if self.mode == 'control':
             return MSE(output_units_group1, frame_targets) + L1
-        elif self.mode == 'hierarchical':
+        elif self.mode == 'hierarchical' or self.mode == 'hierarchical-group2input':
             return (
                 MSE(output_units_group1, frame_targets)*(1-beta) +
                 MSE(output_units_group2, hidden_state_targets)*beta +
