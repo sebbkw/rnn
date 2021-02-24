@@ -1,3 +1,5 @@
+*.out
+*.run
 *.npy
 *.pkl
 .ipynb_checkpoints
