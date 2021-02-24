@@ -56,8 +56,8 @@ for epoch in range(1, hyperparameters["epochs"] + 1):
         )
         
         loss.backward()
-        model.mask_gradients()
         nn.utils.clip_grad_value_(model.parameters(), hyperparameters["gradclip"])
+        model.mask_gradients()
         optimizer.step()
         
         running_loss += loss.item()
