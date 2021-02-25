@@ -10,33 +10,35 @@ print("Using", DEVICE)
 
 hyperparameters = {
     "mode": "hierarchical",
-    "framesize": 15,
-    "tsteps": 20,
+    "framesize": 20,
+    "tsteps": 45,
     "warmup": 4,
     "epochs": 2000,
     "units": 1600,
-    "lr": 10**-3,
+    "lr": 10**-5,
     "gradclip": 0.25,
     "L1": 10**-6,
-    "beta": 0.5
+    "beta": 0.3
 }
 
-train_dataset = FramesDataset('./datasets/processed_dataset_15px_20tsteps_101500.npy', 'all', hyperparameters["warmup"])
+train_dataset = FramesDataset('./datasets/processed_dataset_20px_45tsteps_162400.npy', 'all', hyperparameters["warmup"])
 train_data_loader = torch.utils.data.DataLoader(train_dataset, batch_size=128)
 print("Training dataset length:", len(train_dataset))
 
-model = network.RecurrentTemporalPrediction(
+model = network.RecurrentTemporalPrediction.load(
     hidden_units = hyperparameters["units"],
     frame_size = hyperparameters["framesize"],
     warmup = hyperparameters["warmup"],
-    mode = hyperparameters["mode"]
+    mode = hyperparameters["mode"],
+    path = './models/model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-1e-05lr-0.25gradclip-1e-06L1-0.3beta-20210224-233528.pt'
 )
-model = model.to(DEVICE)
+model.train()
+
 optimizer = optim.Adam(model.parameters(), lr=hyperparameters["lr"])
 
 loss_history = []
 
-for epoch in range(1, hyperparameters["epochs"] + 1):
+for epoch in range(1, 1000 + 1):
     running_loss = 0
     loss_i = 0
 
