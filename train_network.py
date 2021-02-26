@@ -25,14 +25,13 @@ train_dataset = FramesDataset('./datasets/processed_dataset_20px_45tsteps_162400
 train_data_loader = torch.utils.data.DataLoader(train_dataset, batch_size=128)
 print("Training dataset length:", len(train_dataset))
 
-model = network.RecurrentTemporalPrediction.load(
+model = network.RecurrentTemporalPrediction(
     hidden_units = hyperparameters["units"],
     frame_size = hyperparameters["framesize"],
     warmup = hyperparameters["warmup"],
-    mode = hyperparameters["mode"],
-    path = './models/model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-1e-05lr-0.25gradclip-1e-06L1-0.3beta-20210224-233528.pt'
+    mode = hyperparameters["mode"]
 )
-model.train()
+model = model.to(DEVICE)
 
 optimizer = optim.Adam(model.parameters(), lr=hyperparameters["lr"])
 
