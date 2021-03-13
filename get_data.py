@@ -53,13 +53,13 @@ def process_data (data, crop_size, x_crops, y_crops, step):
     
     print("Processed data")
 
-    return np.array(examples)
+    return examples
 
 # Split examples into overlapping windows
 # Returns array in form (n_examples, crop_size, crop_size, window_size)
 def window_data (data, window_size):
     examples_size = len(data)
-    frames_size = data.shape[-1] # Number of frames for each example    
+    frames_size = len(data[0][0][0]) # Number of frames for each example    
     
     examples = []
     for example_n in range(examples_size):
@@ -70,7 +70,7 @@ def window_data (data, window_size):
             examples.append(window)
             
     print("Windowed data")
-    return np.array(examples)
+    return examples
 
 # Returns array in form (n_examples, frames, crop_size**2)
 def reshape_data (data):
@@ -89,9 +89,11 @@ def normalize_data (data):
     
     def normalize_example (a):
         return (a-np.mean(a)) / np.std(a)
-    
-    print("Normalized data")
-    return np.array([normalize_example(a) for a in normalized])
+
+    for i, example in enumerate(normalized):
+        normalized[i] = normalize_example(example)
+
+    return normalized
 
 # Saves dataset as .np file at specified path
 def save_data (data, path):
@@ -101,10 +103,10 @@ def save_data (data, path):
 
 data = get_preprocessed_data('./datasets/preprocessed_dataset.pkl', n_examples='ALL')
 print(data.shape)
-data = process_data(data, crop_size=15, x_crops=10, y_crops=5, step=0.25)
+data = process_data(data, crop_size=32, x_crops=5, y_crops=2, step=0.15)
 data = window_data(data, window_size=4+20+1)
 data = reshape_data(data)
 data = normalize_data(data)
 np.random.shuffle(data)
-save_data(data, "./datasets/processed_dataset_15px_20tsteps.npy")
+save_data(data, "./datasets/processed_dataset_32px_20tsteps.npy")
 print(data.shape)
