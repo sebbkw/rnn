@@ -37,7 +37,7 @@ class RecurrentTemporalPrediction (nn.Module):
 
         if mode == 'control':
             self.output_units = self.output_units_group1
-        elif mode == 'hierarchical':
+        elif mode == 'hierarchical' or self.mode == 'hierarchical-group2input':
             self.output_units = self.output_units_group1 + self.output_units_group2
 
         self.rnn = nn.RNN(
@@ -74,7 +74,7 @@ class RecurrentTemporalPrediction (nn.Module):
             self.rnn.weight_ih_l0.data.mul_(self.rnn_mask)
         if self.mode ==  'control':
             self.fc.weight.data.mul_(self.fc_mask_control)
-        elif self.mode == 'hierarchical':
+        elif self.mode == 'hierarchical' or self.mode == 'hierarchical-group2input':
             self.fc.weight.data.mul_(self.fc_mask_hierarchical)
 
         #self.set_inhibitory_units()
@@ -92,7 +92,7 @@ class RecurrentTemporalPrediction (nn.Module):
             self.rnn.weight_ih_l0.grad.data.mul_(self.rnn_mask)
         if self.mode ==  'control':
             self.fc.weight.grad.data.mul_(self.fc_mask_control)
-        elif self.mode == 'hierarchical':
+        elif self.mode == 'hierarchical' or self.mode == 'hierarchical-group2input':
             self.fc.weight.grad.data.mul_(self.fc_mask_hierarchical)
 
     def set_inhibitory_units (self):
