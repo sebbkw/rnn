@@ -47,7 +47,8 @@ class GaborFitter:
 
     @property
     def model_path_name(self):
-        return os.path.join(self.root, self.name)
+        return self.root
+        #return os.path.join(self.root, self.name)
 
     def fit(self):
         pool = mp.Pool()
@@ -442,7 +443,7 @@ def get_gabors(root, name, spatiotemporal_rfs, min_cc=0.7, min_env=0.5, separabi
     :return: Four elements: Pandas dataframe, tensor, tensor, tensor
     """
 
-    params_df = pd.read_csv(os.path.join(root, name))
+    params_df = pd.read_csv(root)
     gabor_validator = GaborValidator(params_df, spatiotemporal_rfs, min_cc, min_env, separability, inseperable_thresh)
     validated_params_df = gabor_validator.validate()
 
