@@ -5,7 +5,7 @@ import numpy as np
 # n_examples is number of rows to take
 # Returns .pckl file in format (n_examples, n_y_pixels, n_x_pixels, n_t_steps)
 def get_preprocessed_data (path, n_examples):
-    n_examples_slice = slice(None, n_examples)
+    n_examples_slice = slice(*n_examples)
     if n_examples == 'ALL':
         n_examples_slice = slice(None, None)
 
@@ -101,12 +101,12 @@ def save_data (data, path):
         np.save(p, data)
         print("Saved data")
 
-data = get_preprocessed_data('./datasets/preprocessed_dataset.pkl', n_examples='ALL')
+data = get_preprocessed_data('./datasets/preprocessed_dataset.pkl', n_examples=[900, None])
 print(data.shape)
-data = process_data(data, crop_size=32, x_crops=5, y_crops=2, step=0.15)
-data = window_data(data, window_size=4+20+1)
+data = process_data(data, crop_size=32, x_crops=5, y_crops=2, step=0.095)
+data = window_data(data, window_size=4+45+1)
 data = reshape_data(data)
 data = normalize_data(data)
 np.random.shuffle(data)
-save_data(data, "./datasets/processed_dataset_32px_20tsteps.npy")
+save_data(data, "./datasets/processed_dataset_32px_45tsteps_part7.npy")
 print(data.shape)
