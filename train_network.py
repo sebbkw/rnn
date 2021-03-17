@@ -10,23 +10,24 @@ print("Using", DEVICE)
 
 hyperparameters = {
     "mode": "hierarchical",
-    "framesize": 32,
+    "framesize": 20,
     "tsteps": 45,
     "warmup": 4,
     "epochs": 2000,
     "units": 1600,
-    "lr": 10**-4,
+    "lr": 3*10**-4,
     "gradclip": 0.25,
     "L1": 10**-6.25,
-    "beta": 0.3
+    "beta": 0.2
 }
 
 paths = [
-    './datasets/processed_dataset_32px_45tsteps_part1.npy',
-    './datasets/processed_dataset_32px_45tsteps_part2.npy',
-    './datasets/processed_dataset_32px_45tsteps_part3.npy',
-    './datasets/processed_dataset_32px_45tsteps_part4.npy'
+    './datasets/processed_dataset_20px_45tsteps/part1.npy',
+    './datasets/processed_dataset_20px_45tsteps/part2.npy',
+    './datasets/processed_dataset_20px_45tsteps/part3.npy',
+    './datasets/processed_dataset_20px_45tsteps/part4.npy'
 ]
+
 
 train_dataset = FramesDataset(paths, 'all', hyperparameters["warmup"])
 train_data_loader = torch.utils.data.DataLoader(train_dataset, batch_size=128, shuffle=True)
