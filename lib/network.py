@@ -37,7 +37,7 @@ class RecurrentTemporalPrediction (nn.Module):
 
         if mode == 'control':
             self.output_units = self.output_units_group1
-        elif mode == 'hierarchical' or mode == 'hierarchical-group2input':
+        elif mode == 'hierarchical' or self.mode == 'hierarchical-group2input':
             self.output_units = self.output_units_group1 + self.output_units_group2
 
         self.rnn = nn.RNN(
@@ -77,7 +77,7 @@ class RecurrentTemporalPrediction (nn.Module):
         elif self.mode == 'hierarchical' or self.mode == 'hierarchical-group2input':
             self.fc.weight.data.mul_(self.fc_mask_hierarchical)
 
-        self.set_inhibitory_units()
+        #self.set_inhibitory_units()
 
         # Forward pass
         rnn_outputs, _ = self.rnn(inputs)
@@ -131,11 +131,20 @@ class RecurrentTemporalPrediction (nn.Module):
         L1 = self.L1_regularisation(L1_lambda)
 
         if self.mode == 'control':
-            return MSE(output_units_group1, frame_targets) + L1
-        elif self.mode == 'hierarchical' or self.mode == 'hierarchical-group2input':
+            MSE_1 = MSE(output_units_group1, frame_targets) 
             return (
-                MSE(output_units_group1, frame_targets)*(1-beta) +
-                MSE(output_units_group2, hidden_state_targets)*beta +
+                MSE_1 + L1,
+                MSE_1,
+                L1
+            )
+        elif self.mode == 'hierarchical' or self.mode == 'hierarchical-group2input':
+            MSE_1 = MSE(output_units_group1, frame_targets)*(1-beta)
+            MSE_2 = MSE(output_units_group2, hidden_state_targets)*beta
+
+            return (
+                MSE_1 + MSE_2 + L1,
+                MSE_1,
+                MSE_2,
                 L1
             )
 
@@ -155,6 +164,5 @@ class RecurrentTemporalPrediction (nn.Module):
     def load (cls, hidden_units, frame_size, warmup, mode, path):
         model = cls(hidden_units, frame_size, warmup, mode)
         model.load_state_dict(torch.load(path, map_location=torch.device(DEVICE)), strict=False)
-        model.eval()
 
         return model.to(DEVICE)

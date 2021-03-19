@@ -3,25 +3,39 @@ import torch
 import torch.utils.data
 
 class FramesDataset (torch.utils.data.Dataset):
-    def __init__ (self, path, split_type, warmup):
-        dataset = np.load(path, mmap_mode='r+')
+    def __init__ (self, paths, split_type, warmup):
+        datasets = []
 
-        n = len(dataset)
-        splits = {
-            "all": slice(None, None),
-            "train": slice(0, int(n*0.8)),
-            "val": slice(int(n*0.8), int(n*0.9)),
-            "test": slice(int(n*0.9), None)
-        }
+        for path in paths:
+            dataset = np.load(path, mmap_mode='r')
+            n = len(dataset)
+            splits = {
+                "all": slice(None, None),
+                "train": slice(0, int(n*0.8)),
+                "val": slice(int(n*0.8), int(n*0.9)),
+                "test": slice(int(n*0.9), None)
+            }
 
-        self.dataset = dataset[splits[split_type]]  
+            datasets.append(dataset[splits[split_type]])
+
+        self.datasets = datasets
         self.warmup = warmup
+        self.count = 0
         
     def __len__ (self):
-        return len(self.dataset)
+        total_len = 0
+
+        for dataset in self.datasets:
+            total_len += len(dataset)
+
+        return total_len
     
     def __getitem__ (self, i):
-        window = self.dataset[i]
+        dataset_len = len(self.datasets[0])
+        dataset_i = i // dataset_len
+        window_i = i - dataset_len*dataset_i
+
+        window = self.datasets[dataset_i][window_i]
         window = torch.from_numpy(window)
         window = window.type(torch.FloatTensor)
         
