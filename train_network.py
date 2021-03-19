@@ -140,18 +140,8 @@ for epoch in range(1, hyperparameters["epochs"]+1):
     print('Epoch: {}/{}.............'.format(epoch, hyperparameters["epochs"]), end=' ')
     print("Loss: {:.4f}".format(train_history['loss'][-1]))
 
-    # Early stopping
-    PATIENCE = 50
-    if len(val_history['loss']) > PATIENCE:
-        should_quit_early = True
-        for i in range(PATIENCE):
-            if val_history['loss'][-i] < val_history['loss'][-i-1]:
-                should_quit_early = False
-        if should_quit_early:
-            break
-
-    #  Save check points every 500 epochs
-    if epoch % 500 == 0:
+    #  Save check points every 250 epochs
+    if epoch != hyperparameters["epochs"] and epoch % 250 == 0 :
         model.save(hyperparameters, { "train": train_history, "val_history": val_history })
 
 # Finally, save model after all epochs completed / early stopping engaged

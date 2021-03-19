@@ -164,6 +164,5 @@ class RecurrentTemporalPrediction (nn.Module):
     def load (cls, hidden_units, frame_size, warmup, mode, path):
         model = cls(hidden_units, frame_size, warmup, mode)
         model.load_state_dict(torch.load(path, map_location=torch.device(DEVICE)), strict=False)
-        model.eval()
 
         return model.to(DEVICE)
