@@ -15,17 +15,16 @@ hyperparameters = {
     "warmup": 4,
     "epochs": 2000,
     "units": 1600,
-    "lr": 3*10**-4,
+    "lr": 5*10**-4,
     "gradclip": 0.25,
     "L1": 10**-6.25,
     "beta": 0.2
 }
 
 paths = [
-    './datasets/processed_dataset_20px_45tsteps/part1.npy',
-    './datasets/processed_dataset_20px_45tsteps/part2.npy',
-    './datasets/processed_dataset_20px_45tsteps/part3.npy',
-    './datasets/processed_dataset_20px_45tsteps/part4.npy'
+    './datasets/processed_dataset_20px_45tsteps_part1.npy',
+    './datasets/processed_dataset_20px_45tsteps_part2.npy',
+    './datasets/processed_dataset_20px_45tsteps_part3.npy'
 ]
 
 
@@ -146,7 +145,7 @@ for epoch in range(1, hyperparameters["epochs"]+1):
     if len(val_history['loss']) > PATIENCE:
         should_quit_early = True
         for i in range(PATIENCE):
-            if val_history['loss'][-i] < val_loss_history[-i-1]:
+            if val_history['loss'][-i] < val_history['loss'][-i-1]:
                 should_quit_early = False
         if should_quit_early:
             break

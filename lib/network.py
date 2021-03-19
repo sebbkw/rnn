@@ -144,7 +144,7 @@ class RecurrentTemporalPrediction (nn.Module):
             return (
                 MSE_1 + MSE_2 + L1,
                 MSE_1,
-                MSE_2
+                MSE_2,
                 L1
             )
 
