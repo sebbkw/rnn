@@ -29,10 +29,10 @@ paths = [
 
 
 train_dataset = FramesDataset(paths, 'train', hyperparameters["warmup"])
-train_data_loader = torch.utils.data.DataLoader(train_dataset, batch_size=128, shuffle=True)
+train_data_loader = torch.utils.data.DataLoader(train_dataset, batch_size=128, shuffle=True, num_workers=8, pin_memory=True)
 
 val_dataset = FramesDataset(paths, 'val', hyperparameters["warmup"])
-val_data_loader = torch.utils.data.DataLoader(val_dataset, batch_size=128, shuffle=True)
+val_data_loader = torch.utils.data.DataLoader(val_dataset, batch_size=128, shuffle=True, num_workers=8, pin_memory=True)
 
 print("Training dataset length:", len(train_dataset))
 print("Validation dataset length:", len(val_dataset))
@@ -150,4 +150,9 @@ for epoch in range(1, hyperparameters["epochs"]+1):
         if should_quit_early:
             break
 
+    #  Save check points every 500 epochs
+    if epoch % 500 == 0:
+        model.save(hyperparameters, { "train": train_history, "val_history": val_history })
+
+# Finally, save model after all epochs completed / early stopping engaged
 model.save(hyperparameters, { "train": train_history, "val_history": val_history })
