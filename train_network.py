@@ -30,10 +30,10 @@ paths = [
 
 
 train_dataset = FramesDataset(paths, 'train', hyperparameters["warmup"])
-train_data_loader = torch.utils.data.DataLoader(train_dataset, batch_size=128, shuffle=True, num_workers=8, pin_memory=True)
+train_data_loader = torch.utils.data.DataLoader(train_dataset, batch_size=128, shuffle=True, num_workers=4, pin_memory=True)
 
 val_dataset = FramesDataset(paths, 'val', hyperparameters["warmup"])
-val_data_loader = torch.utils.data.DataLoader(val_dataset, batch_size=128, shuffle=True, num_workers=8, pin_memory=True)
+val_data_loader = torch.utils.data.DataLoader(val_dataset, batch_size=128, shuffle=True, num_workers=4, pin_memory=True)
 
 print("Training dataset length:", len(train_dataset))
 print("Validation dataset length:", len(val_dataset))
