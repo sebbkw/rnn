@@ -9,7 +9,7 @@ DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print("Using", DEVICE)
 
 hyperparameters = {
-    "mode": "hierarchical-group2input",
+    "mode": "hierarchical",
     "framesize": 20,
     "tsteps": 45,
     "warmup": 4,
@@ -18,7 +18,8 @@ hyperparameters = {
     "lr": 5*10**-4,
     "gradclip": 0.25,
     "L1": 10**-6,
-    "beta": 0.2
+    "beta": 0.2,
+    "Dale": True
 }
 
 paths = [
@@ -42,6 +43,7 @@ model = network.RecurrentTemporalPrediction(
     frame_size = hyperparameters["framesize"],
     warmup = hyperparameters["warmup"],
     mode = hyperparameters["mode"],
+    Dale = hyperparameters["Dale"]
 )
 model = model.to(DEVICE)
 
