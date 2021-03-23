@@ -21,10 +21,8 @@ def get_file_name (file_name_params = {}, file_type = 'pt'):
     return path_name
 
 class RecurrentTemporalPrediction (nn.Module):
-    def __init__ (self, hidden_units, frame_size, warmup, mode):
+    def __init__ (self, hidden_units, frame_size, warmup, mode, Dale):
         super(RecurrentTemporalPrediction, self).__init__()
-
-        self.inhibitory_ratio = 0.1
 
         self.hidden_units = hidden_units
         self.frame_size = frame_size
@@ -39,6 +37,12 @@ class RecurrentTemporalPrediction (nn.Module):
             self.output_units = self.output_units_group1
         elif mode == 'hierarchical' or self.mode == 'hierarchical-group2input':
             self.output_units = self.output_units_group1 + self.output_units_group2
+
+        self.Dale = Dale
+
+        self.inhibitory_ratio = 0.1
+        self.group1_inhibitory_units = int(self.hidden_units_group*self.inhibitory_ratio)
+        self.group2_inhibitory_units = int(self.hidden_units_group+self.hidden_units_group*self.inhibitory_ratio)
 
         self.rnn = nn.RNN(
             input_size = frame_size**2,
@@ -59,6 +63,11 @@ class RecurrentTemporalPrediction (nn.Module):
         self.rnn_mask = torch.ones(self.rnn.weight_ih_l0.shape).to(DEVICE)
         self.rnn_mask[self.hidden_units_group:, :] = 0
 
+        # Mask to zero out weights for long-range inhbitiory connections
+        self.rnn_mask_inhibitory = torch.ones(self.rnn.weight_hh_l0.shape).to(DEVICE)
+        self.rnn_mask_inhibitory[self.hidden_units_group:, :self.group1_inhibitory_units] = 0 # Group 1 long-range inhib
+        self.rnn_mask_inhibitory[:self.hidden_units_group, self.hidden_units_group:self.group2_inhibitory_units] = 0 # Group 2 long-range inhib
+
         # Mask to zero out weights from group 2 FC input connections
         self.fc_mask_control = torch.ones(self.fc.weight.shape).to(DEVICE)
         self.fc_mask_control[:, self.output_units_group1:] = 0
@@ -77,7 +86,12 @@ class RecurrentTemporalPrediction (nn.Module):
         elif self.mode == 'hierarchical' or self.mode == 'hierarchical-group2input':
             self.fc.weight.data.mul_(self.fc_mask_hierarchical)
 
-        #self.set_inhibitory_units()
+        if self.Dale:
+            print('here!')
+            # Mask long-range inhibitory recurrent connections
+            self.rnn.weight_hh_l0.data.mul_(self.rnn_mask_inhibitory)
+            # Set units to be inhibitory
+            self.set_inhibitory_units()
 
         # Forward pass
         rnn_outputs, _ = self.rnn(inputs)
@@ -95,10 +109,11 @@ class RecurrentTemporalPrediction (nn.Module):
         elif self.mode == 'hierarchical' or self.mode == 'hierarchical-group2input':
             self.fc.weight.grad.data.mul_(self.fc_mask_hierarchical)
 
-    def set_inhibitory_units (self):
-        group1_inhibitory_units = int(self.hidden_units_group*self.inhibitory_ratio)
-        group2_inhibitory_units = int(self.hidden_units_group+self.hidden_units_group*self.inhibitory_ratio)
-        
+        if self.Dale == True:
+            # Mask long-range inhibitory recurrent connections
+            self.rnn.weight_hh_l0.grad.data.mul_(self.rnn_mask_inhibitory)
+
+    def set_inhibitory_units (self):        
         with torch.no_grad():
             hh_weights = self.rnn.weight_hh_l0.clone()
 
@@ -106,8 +121,8 @@ class RecurrentTemporalPrediction (nn.Module):
             hh_weights = torch.abs(hh_weights)
 
             # Next, take negative of absolute for local connections (group 1 to group 1, group 2 to group 2)
-            hh_weights[:self.hidden_units_group, :group1_inhibitory_units] *= -1 # Group 1
-            hh_weights[self.hidden_units_group:, self.hidden_units_group:group2_inhibitory_units] *= -1 # Group 2
+            hh_weights[:self.hidden_units_group, :self.group1_inhibitory_units] *= -1 # Group 1
+            hh_weights[self.hidden_units_group:, self.hidden_units_group:self.group2_inhibitory_units] *= -1 # Group 2
 
             # Update parameters
             self.rnn.weight_hh_l0.copy_(hh_weights)
@@ -161,8 +176,8 @@ class RecurrentTemporalPrediction (nn.Module):
         print('Saved model as ' + model_file_name)
 
     @classmethod
-    def load (cls, hidden_units, frame_size, warmup, mode, path):
-        model = cls(hidden_units, frame_size, warmup, mode)
+    def load (cls, hidden_units, frame_size, warmup, mode, Dale, path):
+        model = cls(hidden_units, frame_size, warmup, mode, Dale)
         model.load_state_dict(torch.load(path, map_location=torch.device(DEVICE)), strict=False)
 
         return model.to(DEVICE)
