@@ -87,7 +87,6 @@ class RecurrentTemporalPrediction (nn.Module):
             self.fc.weight.data.mul_(self.fc_mask_hierarchical)
 
         if self.Dale:
-            print('here!')
             # Mask long-range inhibitory recurrent connections
             self.rnn.weight_hh_l0.data.mul_(self.rnn_mask_inhibitory)
             # Set units to be inhibitory
