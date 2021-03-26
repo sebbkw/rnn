@@ -1,3 +1,5 @@
+import argparse
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -8,6 +10,11 @@ from lib import network
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print("Using", DEVICE)
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--beta')
+parser.add_argument('--L1')
+args = parser.parse_args()
+
 hyperparameters = {
     "mode": "hierarchical",
     "framesize": 20,
@@ -17,8 +24,8 @@ hyperparameters = {
     "units": 1600,
     "lr": 5*10**-4,
     "gradclip": 0.25,
-    "L1": 10**-6.25,
-    "beta": 0.2
+    "L1": 10**(float(args.L1)),
+    "beta": float(args.beta)
 }
 
 paths = [
@@ -36,6 +43,8 @@ val_data_loader = torch.utils.data.DataLoader(val_dataset, batch_size=128, shuff
 
 print("Training dataset length:", len(train_dataset))
 print("Validation dataset length:", len(val_dataset))
+
+print("Beta = {}, L1 = {}".format(hyperparameters["beta"], hyperparameters["L1"]))
 
 model = network.RecurrentTemporalPrediction(
     hidden_units = hyperparameters["units"],
