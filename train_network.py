@@ -28,7 +28,7 @@ hyperparameters = {
     "gradclip": 0.25,
     "L1": 10**(float(args.L1)),
     "beta": float(args.beta),
-    "Dale": True,
+    "Dale": False,
     "path": args.path
 }
 
