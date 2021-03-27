@@ -177,8 +177,8 @@ for epoch in range(1, hyperparameters["epochs"]+1):
     print('Epoch: {}/{}.............'.format(epoch, hyperparameters["epochs"]), end=' ')
     print("Loss: {:.4f}".format(train_history['loss'][-1]))
 
-    #  Save check points every 250 epochs
-    if epoch != hyperparameters["epochs"] and epoch % 250 == 0 :
+    #  Save check points every 100 epochs
+    if epoch != hyperparameters["epochs"] and epoch % 100 == 0 :
         model.save(hyperparameters, { "train": train_history, "val_history": val_history })
 
 # Finally, save model after all epochs completed / early stopping engaged
