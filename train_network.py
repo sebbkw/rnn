@@ -1,3 +1,6 @@
+import argparse
+import pickle
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -8,6 +11,12 @@ from lib import network
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print("Using", DEVICE)
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--beta')
+parser.add_argument('--L1')
+parser.add_argument('--path')
+args = parser.parse_args()
+
 hyperparameters = {
     "mode": "hierarchical",
     "framesize": 20,
@@ -17,8 +26,10 @@ hyperparameters = {
     "units": 1600,
     "lr": 5*10**-4,
     "gradclip": 0.25,
-    "L1": 10**-6.25,
-    "beta": 0.2
+    "L1": 10**(float(args.L1)),
+    "beta": float(args.beta),
+    "Dale": True,
+    "path": args.path
 }
 
 paths = [
@@ -29,20 +40,34 @@ paths = [
 
 
 train_dataset = FramesDataset(paths, 'train', hyperparameters["warmup"])
-train_data_loader = torch.utils.data.DataLoader(train_dataset, batch_size=128, shuffle=True, num_workers=8, pin_memory=True)
+train_data_loader = torch.utils.data.DataLoader(train_dataset, batch_size=128, shuffle=True, num_workers=4, pin_memory=True)
 
 val_dataset = FramesDataset(paths, 'val', hyperparameters["warmup"])
-val_data_loader = torch.utils.data.DataLoader(val_dataset, batch_size=128, shuffle=True, num_workers=8, pin_memory=True)
+val_data_loader = torch.utils.data.DataLoader(val_dataset, batch_size=128, shuffle=True, num_workers=4, pin_memory=True)
 
 print("Training dataset length:", len(train_dataset))
 print("Validation dataset length:", len(val_dataset))
 
-model = network.RecurrentTemporalPrediction(
-    hidden_units = hyperparameters["units"],
-    frame_size = hyperparameters["framesize"],
-    warmup = hyperparameters["warmup"],
-    mode = hyperparameters["mode"],
-)
+model = None
+if hyperparameters["path"]:
+    model = network.RecurrentTemporalPrediction.load(
+        hidden_units = hyperparameters["units"],
+        frame_size = hyperparameters["framesize"],
+        warmup = hyperparameters["warmup"],
+        mode = hyperparameters["mode"],
+        Dale = hyperparameters["Dale"],
+        path = hyperparameters["path"] + '.pt'
+    )
+    print("Loaded checkpoint from", hyperparameters["path"])
+else:
+    model = network.RecurrentTemporalPrediction(
+        hidden_units = hyperparameters["units"],
+        frame_size = hyperparameters["framesize"],
+        warmup = hyperparameters["warmup"],
+        mode = hyperparameters["mode"],
+        Dale = hyperparameters["Dale"]
+    )
+    print("Creating new model")
 model = model.to(DEVICE)
 
 optimizer = optim.Adam(model.parameters(), lr=hyperparameters["lr"])
@@ -59,6 +84,18 @@ val_history = {
     'MSE_2': [],
     'L1': []
 }
+
+# If path is set, load previous train/val history
+if hyperparameters["path"]:
+    with open(hyperparameters["path"] + '.pickle', 'rb') as p:
+        history_data = pickle.load(p)
+        train_history = history_data['train']
+        val_history = history_data['val_history']
+
+        # Set epochs for how many left since last checkpoint
+        hyperparameters["epochs"] -= len(train_history['loss'])
+    print("Loaded loss history from", hyperparameters["path"])
+    print(hyperparameters["epochs"], "epochs left")
 
 for epoch in range(1, hyperparameters["epochs"]+1):
     # Train dataset
@@ -140,9 +177,10 @@ for epoch in range(1, hyperparameters["epochs"]+1):
     print('Epoch: {}/{}.............'.format(epoch, hyperparameters["epochs"]), end=' ')
     print("Loss: {:.4f}".format(train_history['loss'][-1]))
 
-    #  Save check points every 250 epochs
-    if epoch != hyperparameters["epochs"] and epoch % 250 == 0 :
+    #  Save check points every 100 epochs
+    if epoch != hyperparameters["epochs"] and epoch % 100 == 0 :
         model.save(hyperparameters, { "train": train_history, "val_history": val_history })
 
 # Finally, save model after all epochs completed / early stopping engaged
 model.save(hyperparameters, { "train": train_history, "val_history": val_history })
+

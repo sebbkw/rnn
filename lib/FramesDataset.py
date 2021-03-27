@@ -7,7 +7,7 @@ class FramesDataset (torch.utils.data.Dataset):
         datasets = []
 
         for path in paths:
-            dataset = np.load(path, mmap_mode='r')
+            dataset = np.load(path, mmap_mode='r+')
             n = len(dataset)
             splits = {
                 "all": slice(None, None),
