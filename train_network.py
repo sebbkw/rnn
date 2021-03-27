@@ -1,4 +1,5 @@
 import argparse
+import pickle
 
 import torch
 import torch.nn as nn
@@ -13,6 +14,7 @@ print("Using", DEVICE)
 parser = argparse.ArgumentParser()
 parser.add_argument('--beta')
 parser.add_argument('--L1')
+parser.add_argument('--path')
 args = parser.parse_args()
 
 hyperparameters = {
@@ -25,8 +27,9 @@ hyperparameters = {
     "lr": 5*10**-4,
     "gradclip": 0.25,
     "L1": 10**(float(args.L1)),
-    "beta": float(args.beta)
-    "Dale": True
+    "beta": float(args.beta),
+    "Dale": True,
+    "path": args.path
 }
 
 paths = [
@@ -45,15 +48,26 @@ val_data_loader = torch.utils.data.DataLoader(val_dataset, batch_size=128, shuff
 print("Training dataset length:", len(train_dataset))
 print("Validation dataset length:", len(val_dataset))
 
-print("Beta = {}, L1 = {}".format(hyperparameters["beta"], hyperparameters["L1"]))
-
-model = network.RecurrentTemporalPrediction(
-    hidden_units = hyperparameters["units"],
-    frame_size = hyperparameters["framesize"],
-    warmup = hyperparameters["warmup"],
-    mode = hyperparameters["mode"],
-    Dale = hyperparameters["Dale"]
-)
+model = None
+if hyperparameters["path"]:
+    model = network.RecurrentTemporalPrediction.load(
+        hidden_units = hyperparameters["units"],
+        frame_size = hyperparameters["framesize"],
+        warmup = hyperparameters["warmup"],
+        mode = hyperparameters["mode"],
+        Dale = hyperparameters["Dale"],
+        path = hyperparameters["path"] + '.pt'
+    )
+    print("Loaded checkpoint from", hyperparameters["path"])
+else:
+    model = network.RecurrentTemporalPrediction(
+        hidden_units = hyperparameters["units"],
+        frame_size = hyperparameters["framesize"],
+        warmup = hyperparameters["warmup"],
+        mode = hyperparameters["mode"],
+        Dale = hyperparameters["Dale"]
+    )
+    print("Creating new model")
 model = model.to(DEVICE)
 
 optimizer = optim.Adam(model.parameters(), lr=hyperparameters["lr"])
@@ -70,6 +84,18 @@ val_history = {
     'MSE_2': [],
     'L1': []
 }
+
+# If path is set, load previous train/val history
+if hyperparameters["path"]:
+    with open(hyperparameters["path"] + '.pickle', 'rb') as p:
+        history_data = pickle.load(p)
+        train_history = history_data['train']
+        val_history = history_data['val_history']
+
+        # Set epochs for how many left since last checkpoint
+        hyperparameters["epochs"] -= len(train_history['loss'])
+    print("Loaded loss history from", hyperparameters["path"])
+    print(hyperparameters["epochs"], "epochs left")
 
 for epoch in range(1, hyperparameters["epochs"]+1):
     # Train dataset
@@ -157,3 +183,4 @@ for epoch in range(1, hyperparameters["epochs"]+1):
 
 # Finally, save model after all epochs completed / early stopping engaged
 model.save(hyperparameters, { "train": train_history, "val_history": val_history })
+
