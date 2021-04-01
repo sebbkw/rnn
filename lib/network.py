@@ -13,8 +13,9 @@ def get_file_name (file_name_params = {}, file_type = 'pt'):
     path_name = './models/model'
 
     for param in file_name_params:
-        value = file_name_params[param]
-        path_name += '-{}{}'.format(value, param)
+        if param != 'path':
+            value = file_name_params[param]
+            path_name += '-{}{}'.format(value, param)
 
     path_name += '-{}.{}'.format(time_str, file_type)
 
