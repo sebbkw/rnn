@@ -39,8 +39,10 @@ file_paths = [
     "model-hierarchicalmode-20framesize-45tsteps-4warmup-1700epochs-1600units-0.0005lr-0.25gradclip-3.162277660168379e-07L1-0.0beta-FalseDale-20210401-072002",
     "model-1600units-FalseDale-0.4beta-4warmup-0.0005lr-3.162277660168379e-07L1-hierarchicalmode-20framesize-2000epochs-0.25gradclip-45tsteps-20210401-212441"
 ]
+beta_values = [0, 0.1, 0.2, 0.3, 0.4, 0, 0.1, 0.2, 0.3, 0.4, 0, 0.1, 0.2, 0.4, 0, 0.4]
+L1_values = [-5.5, -5.5, -5.5, -5.5, -5.5, -6, -6, -6, -6, -6, -6.25, -6.25, -6.25, -6.25, -6.5, -6.5]
 
-for path in file_paths:
+for path_i, path in enumerate(file_paths):
     hyperparameters = {
         "mode": "hierarchical",
         "framesize": 20,
@@ -49,7 +51,9 @@ for path in file_paths:
         "epochs": 2000,
         "units": 1600,
         "Dale": False,
-        "path": "./models/grid-search-models/" + path
+        "path": "./models/grid-search-models/" + path,
+        "beta": beta_values[path_i],
+        "L1": 10**(L1_values[path_i])
     }
 
     model = network.RecurrentTemporalPrediction.load(
@@ -63,8 +67,6 @@ for path in file_paths:
     print("Loaded checkpoint from", hyperparameters["path"])
 
     model = model.to(DEVICE)
-
-    optimizer = optim.Adam(model.parameters(), lr=hyperparameters["lr"])
 
     train_history = {
         'loss': [],
