@@ -42,6 +42,12 @@ file_paths = [
 beta_values = [0, 0.1, 0.2, 0.3, 0.4, 0, 0.1, 0.2, 0.3, 0.4, 0, 0.1, 0.2, 0.4, 0, 0.4]
 L1_values = [-5.5, -5.5, -5.5, -5.5, -5.5, -6, -6, -6, -6, -6, -6.25, -6.25, -6.25, -6.25, -6.5, -6.5]
 
+file_paths = [
+    "model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-5.62341325190349e-07L1-0.3beta-FalseDale-20210402-105619"
+]
+beta_values = [0.3]
+L1_values = [-6.25]
+
 for path_i, path in enumerate(file_paths):
     hyperparameters = {
         "mode": "hierarchical",
