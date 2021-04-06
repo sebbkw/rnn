@@ -22,7 +22,7 @@ hyperparameters = {
     "framesize": 20,
     "tsteps": 45,
     "warmup": 4,
-    "epochs": 2000,
+    "epochs": 1000,
     "units": 1600,
     "lr": 5*10**-4,
     "gradclip": 0.25,
