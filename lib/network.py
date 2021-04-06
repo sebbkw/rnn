@@ -153,11 +153,11 @@ class RecurrentTemporalPrediction (nn.Module):
                 L1
             )
         elif self.mode == 'hierarchical' or self.mode == 'hierarchical-group2input':
-            MSE_1 = MSE(output_units_group1, frame_targets)*(1-beta)
-            MSE_2 = MSE(output_units_group2, hidden_state_targets)*beta
+            MSE_1 = MSE(output_units_group1, frame_targets)
+            MSE_2 = MSE(output_units_group2, hidden_state_targets)
 
             return (
-                MSE_1 + MSE_2 + L1,
+                MSE_1*(1-beta) + MSE_2*beta + L1,
                 MSE_1,
                 MSE_2,
                 L1
