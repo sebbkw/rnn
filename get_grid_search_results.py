@@ -8,6 +8,7 @@ from lib.FramesDataset import FramesDataset
 from lib import network
 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+#DEVICE = 'cpu'
 print("Using", DEVICE)
 
 data_paths = [
@@ -17,46 +18,74 @@ data_paths = [
 ]
 
 test_dataset = FramesDataset(data_paths, 'test', 4)
-test_data_loader = torch.utils.data.DataLoader(test_dataset, batch_size=128, shuffle=True, num_workers=4, pin_memory=True)
+test_data_loader = torch.utils.data.DataLoader(test_dataset, batch_size=128, shuffle=True, num_workers=4)
 
 print("Test dataset length:", len(test_dataset))
 
 file_paths = [
-    "model-hierarchicalmode-20framesize-45tsteps-4warmup-2000epochs-1600units-0.0005lr-0.25gradclip-3.162277660168379e-06L1-0.0beta-FalseDale-Nonepath-20210331-011945",
+	"model-hierarchicalmode-20framesize-45tsteps-4warmup-2000epochs-1600units-0.0005lr-0.25gradclip-3.162277660168379e-06L1-0.0beta-FalseDale-Nonepath-20210330-075814",
+	"model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-3.162277660168379e-06L1-0.1beta-FalseDale-20210331-000125",
+	"model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-3.162277660168379e-06L1-0.2beta-FalseDale-20210330-235301",
+	"model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-3.162277660168379e-06L1-0.3beta-FalseDale-20210331-000453",
+	"model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-3.162277660168379e-06L1-0.4beta-FalseDale-20210330-235358",
+	"model-0.0beta-hierarchicalmode-1600units-45tsteps-0.0005lr-FalseDale-20framesize-2000epochs-0.25gradclip-1e-06L1-Nonepath-4warmup-20210329-192457",
+	"model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-1e-06L1-0.1beta-FalseDale-20210331-012717",
+	"model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-1e-06L1-0.2beta-FalseDale-20210331-003312",
+	"model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-1e-06L1-0.3beta-FalseDale-20210331-004704",
+	"model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-1e-06L1-0.4beta-FalseDale-20210331-012403",
+	"model-hierarchicalmode-20framesize-45tsteps-4warmup-2000epochs-1600units-0.0005lr-0.25gradclip-5.62341325190349e-07L1-0.0beta-FalseDale-Nonepath-20210329-170258",
+	"model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-5.62341325190349e-07L1-0.1beta-FalseDale-20210331-032839",
+	"model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-5.62341325190349e-07L1-0.2beta-FalseDale-20210331-011540",
+	"model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-5.62341325190349e-07L1-0.3beta-FalseDale-20210402-040547",
+	"model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-5.62341325190349e-07L1-0.4beta-FalseDale-20210401-235750",
+	"model-hierarchicalmode-20framesize-45tsteps-4warmup-1700epochs-1600units-0.0005lr-0.25gradclip-3.162277660168379e-07L1-0.0beta-FalseDale-20210331-180833",
+	"model-hierarchicalmode-20framesize-45tsteps-4warmup-300epochs-1600units-0.0005lr-0.25gradclip-3.162277660168379e-07L1-0.1beta-FalseDale-20210407-153936",
+	"model-hierarchicalmode-20framesize-45tsteps-4warmup-800epochs-1600units-0.0005lr-0.25gradclip-3.162277660168379e-07L1-0.2beta-FalseDale-20210406-095746",
+	"model-hierarchicalmode-20framesize-45tsteps-4warmup-300epochs-1600units-0.0005lr-0.25gradclip-3.162277660168379e-07L1-0.3beta-FalseDale-20210407-082544",
+	"model-1600units-FalseDale-0.4beta-4warmup-0.0005lr-3.162277660168379e-07L1-hierarchicalmode-20framesize-2000epochs-0.25gradclip-45tsteps-20210401-065206"
+]
+
+beta_values = [0, 0.1, 0.2, 0.3, 0.4, 0, 0.1, 0.2, 0.3, 0.4, 0, 0.1, 0.2, 0.3, 0.4, 0, 0.1, 0.2, 0.3, 0.4]
+L1_values = [-5.5, -5.5, -5.5, -5.5, -5.5, -6, -6, -6, -6, -6, -6.25, -6.25, -6.25, -6.25, -6.25, -6.5, -6.5, -6.5, -6.5, -6.5]
+
+file_paths = [
+    "model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-5.62341325190349e-07L1-0.1beta-FalseDale-20210330-074152",
+    "model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-5.62341325190349e-07L1-0.1beta-FalseDale-20210330-173514",
+    "model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-5.62341325190349e-07L1-0.1beta-FalseDale-20210331-032839",
+    "model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-5.62341325190349e-07L1-0.1beta-FalseDale-20210402-145109"
+]
+beta_values = [0.1, 0.1, 0.1, 0.1]
+L1 = [-6.25, -6.25, -6.25, -6.25]
+
+file_paths = [
+    "model-hierarchicalmode-20framesize-45tsteps-4warmup-2000epochs-1600units-0.0005lr-0.25gradclip-3.162277660168379e-06L1-0.0beta-FalseDale-Nonepath-20210330-145957",
     "model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-3.162277660168379e-06L1-0.1beta-FalseDale-20210401-225322",
-    "model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-3.162277660168379e-06L1-0.2beta-FalseDale-20210401-223344",
-    "model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-3.162277660168379e-06L1-0.3beta-FalseDale-20210401-230731",
-    "model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-3.162277660168379e-06L1-0.4beta-FalseDale-20210401-223252",
-    "model-0.0beta-hierarchicalmode-1600units-45tsteps-0.0005lr-FalseDale-20framesize-2000epochs-0.25gradclip-1e-06L1-Nonepath-4warmup-20210330-095151",
-    "model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-1e-06L1-0.1beta-FalseDale-20210402-023944",
-    "model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-1e-06L1-0.2beta-FalseDale-20210401-234622",
-    "model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-1e-06L1-0.3beta-FalseDale-20210402-002425",
-    "model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-1e-06L1-0.4beta-FalseDale-20210402-005735",
-    "model-hierarchicalmode-20framesize-45tsteps-4warmup-2000epochs-1600units-0.0005lr-0.25gradclip-5.62341325190349e-07L1-0.0beta-FalseDale-Nonepath-20210330-070034",
-    "model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-5.62341325190349e-07L1-0.1beta-FalseDale-20210402-145109",
-    "model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-5.62341325190349e-07L1-0.2beta-FalseDale-20210402-003513",
-    "model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-5.62341325190349e-07L1-0.4beta-FalseDale-20210402-130824",
-    "model-hierarchicalmode-20framesize-45tsteps-4warmup-1700epochs-1600units-0.0005lr-0.25gradclip-3.162277660168379e-07L1-0.0beta-FalseDale-20210401-072002",
-    "model-1600units-FalseDale-0.4beta-4warmup-0.0005lr-3.162277660168379e-07L1-hierarchicalmode-20framesize-2000epochs-0.25gradclip-45tsteps-20210401-212441"
+    "model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-3.162277660168379e-06L1-0.2beta-FalseDale-20210401-035258",
+    "model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-3.162277660168379e-06L1-0.3beta-FalseDale-20210329-104947",
+    "model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-3.162277660168379e-06L1-0.4beta-FalseDale-20210330-143620",
+    "model-0.0beta-hierarchicalmode-1600units-45tsteps-0.0005lr-FalseDale-20framesize-2000epochs-0.25gradclip-1e-06L1-Nonepath-4warmup-20210330-065920",
+    "model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-1e-06L1-0.1beta-FalseDale-20210401-154749",
+    "model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-1e-06L1-0.2beta-FalseDale-20210401-045259",
+    "model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-1e-06L1-0.3beta-FalseDale-20210401-144421",
+    "model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-1e-06L1-0.4beta-FalseDale-20210401-152633",
+    "model-hierarchicalmode-20framesize-45tsteps-4warmup-2000epochs-1600units-0.0005lr-0.25gradclip-5.62341325190349e-07L1-0.0beta-FalseDale-Nonepath-20210330-012544",
+    "model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-5.62341325190349e-07L1-0.1beta-FalseDale-20210330-173514",
+    "model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-5.62341325190349e-07L1-0.2beta-FalseDale-20210401-053908",
+    "model-hierarchicalmode-20framesize-45tsteps-4warmup-2000epochs-1600units-0.0005lr-0.25gradclip-5.62341325190349e-07L1-0.3beta-20210327-032254",
+    "model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-5.62341325190349e-07L1-0.4beta-FalseDale-20210402-103009",
+    "model-hierarchicalmode-20framesize-45tsteps-4warmup-1700epochs-1600units-0.0005lr-0.25gradclip-3.162277660168379e-07L1-0.0beta-FalseDale-20210331-022004",
+    "model-hierarchicalmode-20framesize-45tsteps-4warmup-2000epochs-1600units-0.0005lr-0.25gradclip-3.162277660168379e-07L1-0.1beta-20210327-095531",
+    "model-hierarchicalmode-20framesize-45tsteps-4warmup-2000epochs-1600units-0.0005lr-0.25gradclip-3.162277660168379e-07L1-0.2beta-20210327-145725",
+    "model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-3.162277660168379e-07L1-0.3beta-FalseDale-20210402-081632",
+    "model-1600units-FalseDale-0.4beta-4warmup-0.0005lr-3.162277660168379e-07L1-hierarchicalmode-20framesize-2000epochs-0.25gradclip-45tsteps-20210331-012222"
 ]
-beta_values = [0.1, 0.2, 0.3, 0.4, 0.1, 0.2, 0.3, 0.4, 0.1, 0.2]
-L1_values = [-5.5, -5.5, -5.5, -5.5, -6, -6, -6, -6, -6.25, -6.25]
+beta_values = [0, 0.1, 0.2, 0.3, 0.4, 0, 0.1, 0.2, 0.3, 0.4, 0, 0.1, 0.2, 0.3, 0.4, 0, 0.1, 0.2, 0.3, 0.4]
+L1_values = [-5.5, -5.5, -5.5, -5.5, -5.5, -6, -6, -6, -6, -6, -6.25, -6.25, -6.25, -6.25, -6.25, -6.5, -6.5, -6.5, -6.5, -6.5]
 
-file_paths = [
-    "model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-5.62341325190349e-07L1-0.3beta-FalseDale-20210402-105619"
-]
-beta_values = [0.3]
-L1_values = [-6.25]
-
-file_paths = [
-    "model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-3.162277660168379e-07L1-0.1beta-FalseDale-20210402-172408",
-    "model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-3.162277660168379e-07L1-0.2beta-FalseDale-20210403-004347",
-    "model-hierarchicalmode-20framesize-45tsteps-4warmup-1000epochs-1600units-0.0005lr-0.25gradclip-3.162277660168379e-07L1-0.3beta-FalseDale-20210402-173904"
-]
-beta_values = [0.1, 0.2, 0.3]
-L1_values = [-6.5, -6.5, -6.5]
 
 for path_i, path in enumerate(file_paths):
+    print(path_i)
+
     hyperparameters = {
         "mode": "hierarchical",
         "framesize": 20,
@@ -133,7 +162,7 @@ for path_i, path in enumerate(file_paths):
     test_history['MSE_2'] = test_history["MSE_2"] / test_history["i"]
     test_history['L1'] = test_history["L1"] / test_history["i"]
 
-    with open('./grid-search-results/' + path + '.pickle', 'wb') as p:
+    with open('./grid-search-results-early/' + path + '.pickle', 'wb') as p:
         pickle.dump(test_history, p, protocol=4)
 
     print('\n\n')
